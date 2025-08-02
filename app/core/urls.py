@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import ClientViewSet, CreditOfferViewSet, UserViewSet, ChatViewSet, MessageViewSet, LoanViewSet
-from .views.general import home_view, login_view
+from .views.general import HomePageView, LoginPageView, SignUpPageView
 
 router = DefaultRouter()
 router.register(r'customers', ClientViewSet)
@@ -13,7 +13,8 @@ router.register(r'loans', LoanViewSet)
 
 
 urlpatterns = [
-    path("", home_view, name="home"),
-    path("login/", login_view, name="login"),
+    path("", HomePageView.as_view(), name="home"),
+    path("login/", LoginPageView.as_view(), name="login"),
+    path("sign-up/", SignUpPageView.as_view(), name="signup"),
     path('api/', include(router.urls))
 ]

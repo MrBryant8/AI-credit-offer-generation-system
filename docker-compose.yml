@@ -1,25 +1,44 @@
 services:
-    django:
-        build: .
-        container_name: django
 
+    react:
+        build:
+            context: ./frontend
+            dockerfile: Dockerfile
+        container_name: frontend
+        volumes:
+            - ./frontend:/usr/src/app
+        ports:
+            - "3000:80"
+        depends_on:
+            - django
+
+    django:
+        build:
+            context: ./app
+            dockerfile: Dockerfile
+        container_name: django
         command: >
             sh -c "
-            python app/manage.py makemigrations &&
-            python app/manage.py migrate &&
-            python app/manage.py runserver 0.0.0.0:8000
+            python manage.py makemigrations &&
+            python manage.py migrate &&
+            python manage.py runserver 0.0.0.0:8000
             "
         volumes:
-            - .:/usr/src/app
+            - ./app:/usr/src/app
         ports:
             - "8000:8000"
         depends_on:
-            - postgres
+            - pgdb
 
-    postgres:
+    pgdb:
         image: postgres:latest
-        container_name: postgres
+        container_name: pgdb
         environment:
-        - POSTGRES_DB=postgres
-        - POSTGRES_USER=postgres
-        - POSTGRES_PASSWORD=postgres
+        - POSTGRES_DB=credit_offer_app
+        - POSTGRES_USER=admin
+        - POSTGRES_PASSWORD=admin
+        volumes:
+            - pgdata:/var/lib/postgresql/data/
+
+volumes:
+    pgdata:

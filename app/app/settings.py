@@ -77,10 +77,10 @@ WSGI_APPLICATION = 'app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'postgres',
+        'NAME': 'credit_offer_app',
+        'USER': 'admin',
+        'PASSWORD': 'admin',
+        'HOST': 'pgdb',
         'PORT': '5432'
     }
 }
