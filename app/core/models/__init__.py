@@ -1,3 +1,6 @@
 from .clients import Client
 from .offers import CreditOffer
-from .moderators import Moderator
+from .loan_types import Loan
+from .users import User
+from .chats import Chat
+from .messages import Message
