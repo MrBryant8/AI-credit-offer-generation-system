@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Startseite – Credit Offer App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Optionally include Bootstrap from CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">CreditApp</a>
+            <div>
+                <a class="nav-link d-inline text-white" href="#">Home</a>
+                <a class="nav-link d-inline text-white" href="#">Kontakt</a>
+                <a class="btn btn-warning ms-2" href="{% url 'login' %}">Login</a>
+            </div>
+        </div>
+    </nav>
+    {% block content %}
+    <!-- Main Content -->
+    <main class="container my-5 flex-grow-1">
+        <h1 class="mb-4 text-center">Willkommen zur Credit Offer App</h1>
+        <p class="lead text-center">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            Curabitur sollicitudin, ex sed porta placerat, urna erat vehicula lectus, eu rutrum tortor libero eget lectus.
+        </p>
+        <!-- Insert additional content or Django template tags here -->
+    </main>
+    {% endblock %}
+    <!-- Footer -->
+    <footer class="bg-light text-center py-3 mt-auto">
+        <div>Kontakt: <a href="mailto:contact@creditapp.com">contact@creditapp.com</a></div>
+        <div>&copy; {{ year|default:"2025" }} CreditApp. All rights reserved.</div>
+    </footer>
+</body>
+</html>
