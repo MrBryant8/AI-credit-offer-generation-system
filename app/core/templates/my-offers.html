@@ -1,0 +1,38 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="container my-5" style="max-width: 900px;">
+  <h2 class="mb-4">Ihre Kreditanfragen und -angebote</h2>
+
+  {% if credit_offers %}
+    <table class="table table-striped table-bordered align-middle">
+      <thead class="table-primary">
+        <tr>
+          <th scope="col">Angebotsnummer</th>
+          <th scope="col">Betrag</th>
+          <th scope="col">Status</th>
+          <th scope="col">Antragsdatum</th>
+          <th scope="col">Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for offer in credit_offers %}
+        <tr>
+          <td>{{ offer.id }}</td>
+          <td>{{ offer.amount }} €</td>
+          <td>{{ offer.status|title }}</td>
+          <td>{{ offer.created_at|date:"d.m.Y" }}</td>
+          <td>
+            <a href="#" class="btn btn-outline-primary btn-sm">Ansehen</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-info text-center">
+      Sie haben derzeit keine Kreditangebote.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

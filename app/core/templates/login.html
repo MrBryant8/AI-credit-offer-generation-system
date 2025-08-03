@@ -2,6 +2,11 @@
 {% block content %}
 <div class="container mt-4" style="max-width:400px;">
   <h2 class="mb-3">Login</h2>
+  {% if error_message %}
+    <div class="alert alert-danger mt-3">
+      {{ error_message }}
+    </div>
+  {% endif %}
   <form method="post">
   {% csrf_token %}
   <div class="mb-3">

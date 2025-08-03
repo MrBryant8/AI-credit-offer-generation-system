@@ -8,7 +8,7 @@ class Client(models.Model):
         NON_BINARY = 'non-binary'
 
     id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     age = models.IntegerField(null=False, blank=False, default=18)
     is_employed = models.BooleanField(null=False, blank=False, default=False)
     salary = models.IntegerField(null=False, blank=False, default=0)

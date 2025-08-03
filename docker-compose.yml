@@ -3,12 +3,12 @@ services:
     react:
         build:
             context: ./frontend
-            dockerfile: Dockerfile
+            dockerfile: Dockerfiledev
         container_name: frontend
         volumes:
-            - ./frontend:/usr/src/app
+            - ./frontend:/usr/src/frontend
         ports:
-            - "3000:80"
+            - "3000:3000"
         depends_on:
             - django
 
@@ -40,5 +40,19 @@ services:
         volumes:
             - pgdata:/var/lib/postgresql/data/
 
+    pgadmin:
+        image: dpage/pgadmin4
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@example.com
+            PGADMIN_DEFAULT_PASSWORD: secret
+            PGADMIN_LISTEN_PORT: 5050
+        ports:
+            - "15080:5050"
+        volumes:
+            - pgadmin-data:/var/lib/pgadmin/
+        depends_on:
+            -   pgdb
+
 volumes:
     pgdata:
+    pgadmin-data:
