@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.views import View
-from django.views.generic import FormView
+from django.views.generic import FormView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ..forms import *
-from ..models import CreditOffer
+from ..models import *
 from ..services.database_manager import add_new_user, fetch_credit_offers_per_user
+from django.core.paginator import Paginator
 
 
 class LandingPageView(View):
@@ -71,5 +72,44 @@ class MyOffersView(LoginRequiredMixin, View):
 
     def get(self, request):
         credit_offers = fetch_credit_offers_per_user(user_id=request.user.id)
-        return render(request, 'my-offers.html')
+        return render(request, 'my-offers.html', {'credit_offers': credit_offers})
+
+class CreditOfferDetailView(LoginRequiredMixin, DetailView):
+    login_url = '/login'
+    model = CreditOffer
+    template_name = 'offer-detail.html'
+    context_object_name = 'offer'
+
+class AdminDashboardView(LoginRequiredMixin, View):
+    login_url = '/login'
+
+    def get(self, request):
+        model_name = request.GET.get('model', 'users').lower()
+        page = request.GET.get('page', 1)
+
+        model_map = {
+            'users': User,
+            'clients': Client,
+            'loans': Loan,
+            'offers': CreditOffer,
+            'messages': Message,
+            'chats': Chat,
+        }
+
+        model = model_map.get(model_name)
+        if not model:
+            return render(request, 'admin/tables/empty_table.html', {'message': 'Model not found!'})
+
+        queryset = model.objects.all().order_by('id')
+
+        paginator = Paginator(queryset, 5)  # 10 items per page
+        page_obj = paginator.get_page(page)
+
+        context = {
+            'page_obj': page_obj,
+            'model_name': model_name,
+        }
+        template_name = f'admin/tables/{model_name}_table.html'
+        return render(request, template_name, context)
+
 

@@ -15,7 +15,7 @@
             <div>
                 {% if user.is_authenticated %}
                     {% if user.is_admin %}
-                        <a class="btn btn-primary" href="#">Govern</a>
+                        <a class="btn btn-primary" href="{% url 'admin_dashboard' %}">Govern</a>
                     {% elif user.is_moderator %}
                         <a class="btn btn-primary" href="#">Manage</a>
                     {% else %}

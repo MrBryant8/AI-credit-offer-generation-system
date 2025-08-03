@@ -1,0 +1,50 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-4 text-center">Admin Control Panel</h2>
+
+  <!-- Anchor tags styled as buttons -->
+  <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
+    <a href="{% url 'admin_dashboard' %}?model=users" class="btn btn-primary btn-lg">Users</a>
+    <a href="{% url 'admin_dashboard' %}?model=clients" class="btn btn-secondary btn-lg">Clients</a>
+    <a href="{% url 'admin_dashboard' %}?model=loans" class="btn btn-success btn-lg">Loans</a>
+    <a href="{% url 'admin_dashboard' %}?model=offers" class="btn btn-warning btn-lg">Credit Offers</a>
+    <a href="{% url 'admin_dashboard' %}?model=messages" class="btn btn-info btn-lg">Messages</a>
+    <a href="{% url 'admin_dashboard' %}?model=chats" class="btn btn-dark btn-lg">Chats</a>
+  </div>
+
+  <!-- Optionally, you can keep or remove this container based on your needs -->
+  <div id="dynamicContent" class="mb-5">
+    <!-- Content will be loaded on the linked pages -->
+    {% block data %}
+    {% endblock %}
+  </div>
+
+
+<nav aria-label="Page navigation" class="mt-3">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="{% url 'admin_dashboard' %}?model={{ model_name }}&page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Previous</span></li>
+    {% endif %}
+
+    <li class="page-item disabled">
+      <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    </li>
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="{% url 'admin_dashboard' %}?model={{ model_name }}&page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Next</span></li>
+    {% endif %}
+  </ul>
+</nav>
+</div>
+{% endblock %}
+

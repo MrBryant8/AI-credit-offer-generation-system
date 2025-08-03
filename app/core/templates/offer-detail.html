@@ -1,0 +1,72 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      {% if offer.client.id == user.id or user.is_moderator %}
+
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white text-center">
+          <h3 class="mb-0">Kreditangebot Details — Angebot #{{ offer.id }}</h3>
+        </div>
+
+        <div class="card-body">
+          <dl class="row">
+            <dt class="col-sm-5">Betrag</dt>
+            <dd class="col-sm-7">{{ offer.loan_type.amount_start }} - {{ offer.loan_type.amount_end }} €</dd>
+
+            <dt class="col-sm-5">Zinssatz</dt>
+            <dd class="col-sm-7">{{ offer.loan_type.interest|floatformat:2 }}</dd>
+
+            <dt class="col-sm-5">Laufzeit (Monate)</dt>
+            <dd class="col-sm-7">{{ offer.loan_type.duration }}</dd>
+
+            <dt class="col-sm-5">Beschreibung</dt>
+            <dd class="col-sm-7">{{ offer.loan_type.description }}</dd>
+
+            <dt class="col-sm-5">Status</dt>
+            <dd class="col-sm-7">
+              {% if offer.is_accepted %}
+                <span class="badge bg-success">Akzeptiert</span>
+              {% else %}
+                <span class="badge bg-danger">Abgelehnt</span>
+              {% endif %}
+            </dd>
+
+            <dt class="col-sm-5">Antragsdatum</dt>
+            <dd class="col-sm-7">{{ offer.created_at|date:"d.m.Y" }}</dd>
+            {% if user.is_authenticated and user.is_moderator %}
+              <dt class="col-sm-5">Moderator Kommentar</dt>
+              <dd class="col-sm-7">{{ offer.moderator_feedback|linebreaksbr }}</dd>
+            {% endif %}
+
+            <dt class="col-sm-5">E-Mail Inhalt</dt>
+            <dd class="col-sm-7"><pre class="bg-light p-2 rounded">{{ offer.email_content }}</pre></dd>
+              <dt class="col-sm-5">Aktiv?</dt>
+            <dd class="col-sm-7">
+              {% if offer.is_active %}
+                <span class="badge bg-success">Ja</span>
+              {% else %}
+                <span class="badge bg-danger">Nein</span>
+              {% endif %}
+            </dd>
+            <dt class="col-sm-5">Ablaufdatum</dt>
+            <dd class="col-sm-7">{{ offer.expires_at|date:"d.m.Y" }}</dd>
+          </dl>
+        </div>
+
+        <div class="card-footer text-center">
+          <a href="{% url 'my-offers' %}" class="btn btn-secondary">Zurück zu meinen Angeboten</a>
+        </div>
+      </div>
+    {% else %}
+       <div class="alert alert-warning shadow-sm" role="alert">
+        Not authorized to view offer
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+

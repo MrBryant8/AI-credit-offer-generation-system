@@ -18,11 +18,13 @@ def add_new_user(first_name, last_name, email, password):
             first_name=first_name,
             last_name=last_name,
         )
+        Client.objects.create(
+            user=user
+        )
     return user
 
 def fetch_credit_offers_per_user(user_id):
     credit_offers = CreditOffer.objects.filter(client_id=user_id)
-    print(credit_offers)
     return credit_offers
 
 
