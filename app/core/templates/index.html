@@ -14,9 +14,8 @@
             <a class="navbar-brand" href="{% url 'home' %}">SmartCredit</a>
             <div>
                 {% if user.is_authenticated %}
-                    {% if user.is_admin %}
+                    {% if user.is_moderator %}
                         <a class="btn btn-primary" href="{% url 'admin_dashboard' %}">Govern</a>
-                    {% elif user.is_moderator %}
                         <a class="btn btn-primary" href="{% url 'manage' %}">Manage</a>
                     {% else %}
                         <a class="nav-link d-inline text-white" href="{% url 'my-offers' %}">My Offers</a>
