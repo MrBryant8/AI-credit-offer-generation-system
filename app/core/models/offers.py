@@ -5,13 +5,13 @@ from .loan_types import Loan
 
 class CreditOffer(models.Model):
     id = models.AutoField(primary_key=True)
-    client_id = models.ForeignKey(Client, on_delete=models.CASCADE)
-    loan_type_id = models.ForeignKey(Loan, on_delete=models.CASCADE, default=1)
-    email_content = models.TextField()
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    loan_type = models.ForeignKey(Loan,on_delete=models.PROTECT)
+    email_content = models.TextField(unique=True, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     moderator_feedback = models.TextField()
-    is_accepted = models.BooleanField()
-    is_active = models.BooleanField()
+    is_accepted = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     expires_at = models.DateTimeField(default=timezone.now)
 
