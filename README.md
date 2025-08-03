@@ -1,7 +1,14 @@
 # Start project locally
 
-- for development:
-  - at the moment I cannot create a named volume for the frontend folder, so that we dynamically see the server in the browser. Suggest work offline for the visual part and the api should be handled via docker-compose up/down until I find a solution
+- docker-compose up
 
-- for production-ready version:
-  - docker-compose up
+Manually change
+- for development:
+  - in docker-compose.yml change:
+    - frontend service:
+      - the dockerfile to Dockerfiledev
+
+- for production-ready:
+  - in docker-compose.yml change:
+    - frontend service:
+      - the dockerfile to Dockerfile
