@@ -1,8 +1,9 @@
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.views import View
 from django.views.generic import FormView, DetailView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from ..forms import *
 from ..models import *
 from ..services.database_manager import add_new_user, fetch_credit_offers_per_user
@@ -74,14 +75,23 @@ class MyOffersView(LoginRequiredMixin, View):
         credit_offers = fetch_credit_offers_per_user(user_id=request.user.id)
         return render(request, 'my-offers.html', {'credit_offers': credit_offers})
 
+
 class CreditOfferDetailView(LoginRequiredMixin, DetailView):
     login_url = '/login'
     model = CreditOffer
     template_name = 'offer-detail.html'
     context_object_name = 'offer'
 
-class AdminDashboardView(LoginRequiredMixin, View):
+
+class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, View):
     login_url = '/login'
+
+    def test_func(self):
+        return getattr(self.request.user, 'is_moderator', False)
+
+    def handle_no_permission(self):
+        # Optional: render a custom 403 template or return a basic forbidden response
+        return HttpResponseForbidden("You do not have permission to access this page.")
 
     def get(self, request):
         model_name = request.GET.get('model', 'users').lower()
@@ -113,3 +123,15 @@ class AdminDashboardView(LoginRequiredMixin, View):
         return render(request, template_name, context)
 
 
+class ManageView(LoginRequiredMixin, UserPassesTestMixin, View):
+    login_url = '/login'
+
+    def test_func(self):
+        return getattr(self.request.user, 'is_moderator', False)
+
+    def handle_no_permission(self):
+        # Optional: render a custom 403 template or return a basic forbidden response
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    def get(self, request):
+        return render(request, 'manage.html')

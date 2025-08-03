@@ -1,8 +1,7 @@
 from django.contrib.auth.views import LogoutView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ClientViewSet, CreditOfferViewSet, UserViewSet, ChatViewSet, MessageViewSet, LoanViewSet
-from .views.general import *
+from .views import *
 
 router = DefaultRouter()
 router.register(r'customers', ClientViewSet)
@@ -22,5 +21,6 @@ urlpatterns = [
     path("my-offers/", MyOffersView.as_view(), name="my-offers"),
     path('offers/<int:pk>/', CreditOfferDetailView.as_view(), name='offer_detail'),
     path('admin-dashboard/', AdminDashboardView.as_view(), name='admin_dashboard'),
+    path("manage/", ManageView.as_view(), name="manage"),
     path('api/', include(router.urls))
 ]
