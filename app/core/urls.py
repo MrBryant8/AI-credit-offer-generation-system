@@ -22,5 +22,6 @@ urlpatterns = [
     path('offers/<int:pk>/', CreditOfferDetailView.as_view(), name='offer_detail'),
     path('admin-dashboard/', AdminDashboardView.as_view(), name='admin_dashboard'),
     path("manage/", ManageView.as_view(), name="manage"),
+    path("manage/suggested-offers", ModeratorOffersView.as_view(), name="moderator_offers"),
     path('api/', include(router.urls))
 ]

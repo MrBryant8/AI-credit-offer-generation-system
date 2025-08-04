@@ -11,7 +11,7 @@ class CreditOffer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     moderator_feedback = models.TextField()
-    is_accepted = models.BooleanField(default=False)
+    is_accepted = models.BooleanField()
     is_active = models.BooleanField(default=True)
     expires_at = models.DateTimeField(default=timezone.now)
 

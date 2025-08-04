@@ -6,7 +6,7 @@ from django.views.generic import FormView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from ..forms import *
 from ..models import *
-from ..services.database_manager import add_new_user, fetch_credit_offers_per_user
+from ..services.custom_api import *
 from django.core.paginator import Paginator
 
 
@@ -135,3 +135,19 @@ class ManageView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def get(self, request):
         return render(request, 'manage.html')
+
+
+class ModeratorOffersView(LoginRequiredMixin, UserPassesTestMixin, View):
+    login_url = '/login'
+
+    def test_func(self):
+        return getattr(self.request.user, 'is_moderator', False)
+
+    def handle_no_permission(self):
+        # Optional: render a custom 403 template or return a basic forbidden response
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    def get(self, request):
+        deactivate_old_credit_offers()
+        credit_offers = CreditOffer.objects.filter(is_active=True)
+        return render(request, 'suggested-offers.html', {'credit_offers': credit_offers})

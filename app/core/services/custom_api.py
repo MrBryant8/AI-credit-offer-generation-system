@@ -1,6 +1,10 @@
+from datetime import timedelta
+
 from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
+from django.utils import timezone
+
 from ..models import *
 
 def add_new_user(first_name, last_name, email, password):
@@ -24,7 +28,15 @@ def add_new_user(first_name, last_name, email, password):
     return user
 
 def fetch_credit_offers_per_user(user_id):
+    deactivate_old_credit_offers()
     credit_offers = CreditOffer.objects.filter(client_id=user_id)
     return credit_offers
+
+def deactivate_old_credit_offers():
+    credit_offers = CreditOffer.objects.filter(is_active=True, expires_at__lt=timezone.now())
+    for credit_offer in credit_offers:
+        credit_offer.is_active = False
+        credit_offer.save()
+
 
 

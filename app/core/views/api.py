@@ -1,12 +1,14 @@
 from rest_framework import viewsets
 from ..models import Client, CreditOffer, User, Chat, Message, Loan
 from ..serializers import ClientSerializer, CreditOfferSerializer, UserSerializer, ChatSerializer, MessageSerializer, LoanSerializer
+from ..views.general import deactivate_old_credit_offers
 
 class ClientViewSet(viewsets.ModelViewSet):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
 
 class CreditOfferViewSet(viewsets.ModelViewSet):
+    deactivate_old_credit_offers()
     queryset = CreditOffer.objects.all()
     serializer_class = CreditOfferSerializer
 
