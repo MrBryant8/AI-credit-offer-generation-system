@@ -8,7 +8,6 @@ class ClientViewSet(viewsets.ModelViewSet):
     serializer_class = ClientSerializer
 
 class CreditOfferViewSet(viewsets.ModelViewSet):
-    deactivate_old_credit_offers()
     queryset = CreditOffer.objects.all()
     serializer_class = CreditOfferSerializer
 

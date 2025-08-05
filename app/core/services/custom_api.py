@@ -33,10 +33,9 @@ def fetch_credit_offers_per_user(user_id):
     return credit_offers
 
 def deactivate_old_credit_offers():
-    credit_offers = CreditOffer.objects.filter(is_active=True, expires_at__lt=timezone.now())
-    for credit_offer in credit_offers:
-        credit_offer.is_active = False
-        credit_offer.save()
+    expiry_cutoff = timezone.now() - timedelta(weeks=1)
+    CreditOffer.objects.filter(is_active=True, created_at__lt=expiry_cutoff).update(is_active=False)
+    
 
 
 

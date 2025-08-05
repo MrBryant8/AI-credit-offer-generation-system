@@ -20,10 +20,12 @@
         <tr>
           <td>{{ offer.id }}</td>
           <td>{{ offer.loan_type.amount_start }} - {{ offer.loan_type.amount_end }}€</td>
-          {% if offer.is_accepted %}
+          {% if offer.is_accepted == True %}
             <td> Accepted </td>
-          {% else %}
+          {% elif offer.is_accepted == False %}
             <td> Declined </td>
+          {% else %}
+            <td> Decision Pending </td>
           {% endif %}
           <td>{{ offer.created_at|date:"d.m.Y" }}</td>
           <td>

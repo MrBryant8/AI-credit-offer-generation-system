@@ -19,8 +19,11 @@ class EditOfferEmailForm(forms.ModelForm):
         model = CreditOffer
         fields = ['email_content', 'moderator_feedback']
         widgets = {
-            'email_content': forms.Textarea(attrs={'rows': 10, 'class': 'form-control'}),
+            'email_content': forms.Textarea(attrs={'rows': 8, 'class': 'form-control'}),
+            'moderator_feedback': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
         }
         labels = {
             'email_content': 'E-Mail Inhalt',
+            'moderator_feedback': 'Moderator Kommentar',
         }
+

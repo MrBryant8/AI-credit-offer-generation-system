@@ -1,6 +1,9 @@
+import time
 from django.http import HttpResponseForbidden
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages as msg
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.messages import get_messages
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import FormView, DetailView, UpdateView
@@ -83,6 +86,17 @@ class CreditOfferDetailView(LoginRequiredMixin, DetailView):
     template_name = 'offer-detail.html'
     context_object_name = 'offer'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        offer = context['offer']
+        context['expiry_date'] = offer.created_at + timedelta(weeks=1)
+
+        storage = get_messages(self.request)
+        messages_list = list(storage)
+        context['last_message'] = messages_list[-1] if messages_list else None
+
+        return context
+    
 
 class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, View):
     login_url = '/login'
@@ -154,6 +168,8 @@ class ModeratorOffersView(LoginRequiredMixin, UserPassesTestMixin, View):
         return render(request, 'suggested-offers.html', {'credit_offers': credit_offers})
 
 class EditOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    login_url = '/login'
+    
     model = CreditOffer
     form_class = EditOfferEmailForm
     template_name = 'creditoffer_edit_email.html'
@@ -170,3 +186,24 @@ class EditOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         if self.request.user.is_authenticated:
             return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
         return super().handle_no_permission()
+
+class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
+    login_url = "/login"
+    
+    def test_func(self):
+        # For example: only moderators can send emails
+        return self.request.user.is_moderator
+
+    def post(self, request, pk):
+        offer = get_object_or_404(CreditOffer, pk=pk)
+        
+        # Implement your email sending logic here
+        # e.g., using Django's send_mail or other email service
+
+        # Example (pseudo):
+        # send_offer_email(offer)
+
+        msg.success(request, f"E-Mail für Angebot #{offer.id} wurde erfolgreich versandt.")
+
+        # needs more
+        return redirect('offer_detail', pk=pk)
