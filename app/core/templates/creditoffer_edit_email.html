@@ -1,0 +1,21 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-4">E-Mail Inhalt bearbeiten — Angebot #{{ object.id }}</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      {{ form.email_content.label_tag }}
+      {{ form.email_content }}
+      {% if form.email_content.errors %}
+        <div class="text-danger">{{ form.email_content.errors }}</div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Speichern</button>
+    <a href="{% url 'offer_detail' object.id %}" class="btn btn-secondary ms-2">Abbrechen</a>
+  </form>
+</div>
+{% endblock %}

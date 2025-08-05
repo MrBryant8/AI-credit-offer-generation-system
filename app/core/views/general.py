@@ -1,8 +1,9 @@
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import FormView, DetailView
+from django.views.generic import FormView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from ..forms import *
 from ..models import *
@@ -151,3 +152,21 @@ class ModeratorOffersView(LoginRequiredMixin, UserPassesTestMixin, View):
         deactivate_old_credit_offers()
         credit_offers = CreditOffer.objects.filter(is_active=True)
         return render(request, 'suggested-offers.html', {'credit_offers': credit_offers})
+
+class EditOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = CreditOffer
+    form_class = EditOfferEmailForm
+    template_name = 'creditoffer_edit_email.html'
+
+    def get_success_url(self):
+        return reverse_lazy('offer_detail', kwargs={'pk': self.object.pk})
+
+    def test_func(self):
+        # Only allow moderators
+        return self.request.user.is_moderator
+
+    def handle_no_permission(self):
+        # Optionally redirect or raise 403
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
+        return super().handle_no_permission()
