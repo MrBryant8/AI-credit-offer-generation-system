@@ -237,5 +237,40 @@ class AddCustomerView(View):
             'client_form': client_form,
         })
     
+class AcceptOfferView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        offer = get_object_or_404(CreditOffer, pk=pk)
 
+        # Optional: check that user belongs to this offer (e.g., offer.client.user == request.user)
+        print(offer.client.user)
+        if not offer.client or offer.client.user != request.user:
+            msg.error(request, "Sie haben keine Berechtigung, dieses Angebot anzunehmen.")
+            return redirect('offer_detail', pk=pk)
+
+        if offer.is_accepted is True:
+            msg.info(request, "Dieses Angebot wurde bereits akzeptiert.")
+        else:
+            offer.is_accepted = True
+            offer.save()
+            msg.success(request, "Sie haben das Angebot angenommen.")
+
+        return redirect('offer_detail', pk=pk)
+
+class RejectOfferView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        offer = get_object_or_404(CreditOffer, pk=pk)
+
+        # Optional: check that user belongs to this offer
+        if not offer.client or offer.client.user != request.user:
+            msg.error(request, "Sie haben keine Berechtigung, dieses Angebot abzulehnen.")
+            return redirect('offer_detail', pk=pk)
+
+        if offer.is_accepted is False:
+            msg.info(request, "Dieses Angebot wurde bereits abgelehnt.")
+        else:
+            offer.is_accepted = False
+            offer.save()
+            msg.success(request, "Sie haben das Angebot abgelehnt.")
+
+        return redirect('offer_detail', pk=pk)
     
