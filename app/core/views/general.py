@@ -193,6 +193,13 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
         # For example: only moderators can send emails
         return self.request.user.is_moderator
+    
+    def handle_no_permission(self):
+        # Optionally redirect or raise 403
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
+        return super().handle_no_permission()
+
 
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
@@ -205,10 +212,11 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         msg.success(request, f"E-Mail für Angebot #{offer.id} wurde erfolgreich versandt.")
 
-        # needs more
+        # TODO needs more
         return redirect('offer_detail', pk=pk)
     
-class AddCustomerView(View):
+class AddCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
+    login_url="/login"
     template_name = 'add-customer.html'
 
     def get(self, request):
@@ -237,7 +245,17 @@ class AddCustomerView(View):
             'client_form': client_form,
         })
     
+    def test_func(self):
+        return self.request.user.is_moderator
+    
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
+        return super().handle_no_permission()
+    
 class AcceptOfferView(LoginRequiredMixin, View):
+    login_url="/login"
+
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
 
@@ -255,8 +273,18 @@ class AcceptOfferView(LoginRequiredMixin, View):
             msg.success(request, "Sie haben das Angebot angenommen.")
 
         return redirect('offer_detail', pk=pk)
+    
+    def test_func(self):
+        return not self.request.user.is_moderator
+    
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
+        return super().handle_no_permission()
 
 class RejectOfferView(LoginRequiredMixin, View):
+    login_url="/login"
+
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
 
@@ -273,4 +301,41 @@ class RejectOfferView(LoginRequiredMixin, View):
             msg.success(request, "Sie haben das Angebot abgelehnt.")
 
         return redirect('offer_detail', pk=pk)
+    
+    def test_func(self):
+        return not self.request.user.is_moderator
+    
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
+        return super().handle_no_permission()
+    
+class ChatView(LoginRequiredMixin, View):
+    template_name = 'chat.html'
+    login_url = "/login"
+
+    def get(self, request, pk):
+        offer = get_object_or_404(CreditOffer, pk=pk)
+        history = request.session.get(f'chat_history_offer_{pk}', [])
+        context = {
+            'messages': history,
+            'offer': offer,
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, pk):
+        offer = get_object_or_404(CreditOffer, pk=pk)
+        user_message = request.POST.get('message')
+        session_key = f'chat_history_offer_{pk}'
+        history = request.session.get(session_key, [])
+        if user_message:
+            history.append({'role': 'user', 'text': user_message})
+
+            # TODO: Call your LLM API here, possibly passing 'offer' context as well
+            llm_response = LLM_generate_reply(user_message, history, offer)
+            history.append({'role': 'bot', 'text': llm_response})
+
+            request.session[session_key] = history  # save updated history for this offer's chat
+
+        return redirect('chat_page', pk=pk)
     

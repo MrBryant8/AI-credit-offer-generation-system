@@ -35,6 +35,9 @@ def fetch_credit_offers_per_user(user_id):
 def deactivate_old_credit_offers():
     expiry_cutoff = timezone.now() - timedelta(weeks=1)
     CreditOffer.objects.filter(is_active=True, created_at__lt=expiry_cutoff).update(is_active=False)
+
+def LLM_generate_reply(a,b,c):
+    return "I am a dummy."
     
 
 

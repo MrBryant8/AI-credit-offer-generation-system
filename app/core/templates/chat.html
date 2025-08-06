@@ -1,0 +1,48 @@
+{% extends 'index.html' %}
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm" id="chat-card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-robot me-2"></i>
+                        KI-Chat Assistent - Creditoffer #{{ offer.id }}
+                    </h4>
+                    <p>{{ offer.loan_type.description }}</p>
+                </div>
+                <div class="card-body" style="height: 32rem; overflow-y: auto;" id="chat-log">
+                    {% for message in messages %}
+                        <div class="mb-3 d-flex {% if message.role == 'user' %}justify-content-end{% else %}justify-content-start{% endif %}">
+                            <div class="p-2 rounded {% if message.role == 'user' %}bg-primary text-white{% else %}bg-light text-dark border{% endif %}">
+                                {% if message.role == 'user' %}
+                                    <i class="bi bi-person-circle me-1"></i>
+                                {% else %}
+                                    <i class="bi bi-robot me-1"></i>
+                                {% endif %}
+                                {{ message.text }}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center text-muted mt-5">
+                            <i class="bi bi-chat-dots fs-2"></i>
+                            <div>Frag mich alles – der Chat ist noch leer.</div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="card-footer bg-light">
+                    <form method="post" class="d-flex" autocomplete="off">
+                        {% csrf_token %}
+                        <input type="text" name="message" class="form-control me-2" placeholder="Ihre Nachricht..." autocomplete="off" autofocus required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Senden
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+{% endblock %}

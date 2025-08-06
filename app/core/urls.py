@@ -24,6 +24,7 @@ urlpatterns = [
     path('offer/<int:pk>/reject/', RejectOfferView.as_view(), name='reject_offer'),
     path('offer/<int:pk>/edit-email/', EditOfferEmailView.as_view(), name='edit_offer_email'),
     path('offer/<int:pk>/send-email/', SendOfferEmailView.as_view(), name='send_offer_email'),
+    path("offer/<int:pk>/chat", ChatView.as_view(), name="chat_page"),
     path('admin-dashboard/', AdminDashboardView.as_view(), name='admin_dashboard'),
     path("manage/", ManageView.as_view(), name="manage"),
     path("manage/suggested-offers", ModeratorOffersView.as_view(), name="moderator_offers"),
