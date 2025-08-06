@@ -18,12 +18,13 @@ urlpatterns = [
     path("logout/", logout_view, name="logout"),
     path("sign-up/", SignUpPageView.as_view(), name="signup"),
     path("home/", HomePageView.as_view(), name="home"),
-    path("my-offers/", MyOffersView.as_view(), name="my-offers"),
+    path("my-offers/", MyOffersView.as_view(), name="my_offers"),
     path('offers/<int:pk>/', CreditOfferDetailView.as_view(), name='offer_detail'),
     path('offer/<int:pk>/edit-email/', EditOfferEmailView.as_view(), name='edit_offer_email'),
     path('offer/<int:pk>/send-email/', SendOfferEmailView.as_view(), name='send_offer_email'),
     path('admin-dashboard/', AdminDashboardView.as_view(), name='admin_dashboard'),
     path("manage/", ManageView.as_view(), name="manage"),
     path("manage/suggested-offers", ModeratorOffersView.as_view(), name="moderator_offers"),
+    path("manage/add-customer", AddCustomerView.as_view(), name="add_customer"),
     path('api/', include(router.urls))
 ]

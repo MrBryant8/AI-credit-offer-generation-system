@@ -207,3 +207,35 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         # needs more
         return redirect('offer_detail', pk=pk)
+    
+class AddCustomerView(View):
+    template_name = 'add-customer.html'
+
+    def get(self, request):
+        user_form = UserRegisterForm()
+        client_form = ClientForm()
+        return render(request, self.template_name, {
+            'user_form': user_form,
+            'client_form': client_form,
+        })
+
+    def post(self, request):
+        user_form = UserRegisterForm(request.POST)
+        client_form = ClientForm(request.POST)
+        if user_form.is_valid() and client_form.is_valid():
+            user = user_form.save(commit=False)
+            user.set_password(user_form.cleaned_data['password'])
+            user.save()
+            client = client_form.save(commit=False)
+            client.user = user
+            client.save()
+            msg.success(request, "Kunde und Benutzer wurden erfolgreich erstellt.")
+            return redirect('manage')  # Adjust to your desired URL name
+        # If forms are invalid, re-render page with errors
+        return render(request, self.template_name, {
+            'user_form': user_form,
+            'client_form': client_form,
+        })
+    
+
+    

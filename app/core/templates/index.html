@@ -18,7 +18,7 @@
                         <a class="btn btn-primary" href="{% url 'admin_dashboard' %}">Govern</a>
                         <a class="btn btn-primary" href="{% url 'manage' %}">Manage</a>
                     {% else %}
-                        <a class="nav-link d-inline text-white" href="{% url 'my-offers' %}">My Offers</a>
+                        <a class="nav-link d-inline text-white" href="{% url 'my_offers' %}">My Offers</a>
                     {% endif %}
                     <a class="nav-link d-inline text-white" href="{% url 'logout' %}">Logout ({{ user.get_full_name|default:user.email }})</a>
                 {% else %}

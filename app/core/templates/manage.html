@@ -1,6 +1,20 @@
 {% extends 'index.html' %}
 
 {% block content %}
+
+{% if messages %}
+  <div class="container mt-3">
+    {% for message in messages %}
+      <div class="alert 
+        {% if message.tags %} alert-{{ message.tags }} {% else %} alert-info {% endif %} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+
 <div class="container my-5 text-center">
   <h2 class="mb-5">Welcome to the Management Dashboard</h2>
     <p class="lead text-muted">Select an action to proceed.</p>
@@ -9,7 +23,7 @@
       <i class="bi bi-list-check fs-4"></i>
       <span>View Generated Offers</span>
     </a>
-    <a href="#" class="btn btn-success btn-lg px-5 py-3 d-flex align-items-center gap-2 shadow">
+    <a href="{% url 'add_customer' %}" class="btn btn-success btn-lg px-5 py-3 d-flex align-items-center gap-2 shadow">
       <i class="bi bi-person-plus fs-4"></i>
       <span>Add Customer</span>
     </a>
