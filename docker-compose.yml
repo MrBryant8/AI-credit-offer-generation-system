@@ -21,6 +21,10 @@ services:
             context: ./app
             dockerfile: Dockerfile
         container_name: django
+        models:
+            llm:
+                endpoint_var: LLM_URL
+                model_var: LLM_NAME
         command: >
             sh -c "
             python manage.py makemigrations &&
@@ -57,6 +61,18 @@ services:
             - pgadmin-data:/var/lib/pgadmin/
         depends_on:
             -   pgdb
+
+models:
+    llm:
+        model: ai/gemma3
+        context_size: 4096
+        runtime_flags:
+        - "--verbose"                       # Set verbosity level to infinity
+        - "--verbose-prompt"                # Print a verbose prompt before generation
+        - "--log-prefix"                    # Enable prefix in log messages
+        - "--log-timestamps"                # Enable timestamps in log messages
+        - "--log-colors" 
+        
 
 volumes:
     pgdata:
