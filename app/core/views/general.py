@@ -313,10 +313,18 @@ class RejectOfferView(LoginRequiredMixin, View):
 class ChatView(LoginRequiredMixin, View):
     template_name = 'chat.html'
     login_url = "/login"
+    chat_id_key = "chat_id"
 
     def get(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
-        history = request.session.get(f'chat_history_offer_{pk}', [])
+        chat_id = None
+        if request.session.get(self.chat_id_key) is None:
+            chat_id = create_chat()
+            request.session["chat_id"] = chat_id
+        else:
+            chat_id = request.session.get("chat_id")
+
+        history = request.session.get(f'chat_history_{chat_id}', [])
         context = {
             'messages': history,
             'offer': offer,
@@ -326,14 +334,13 @@ class ChatView(LoginRequiredMixin, View):
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
         user_message = request.POST.get('message')
-        session_key = f'chat_history_offer_{pk}'
+        chat_id = request.session.get("chat_id")
+        session_key = f'chat_history_{chat_id}'
         history = request.session.get(session_key, [])
         if user_message:
-            history.append({'role': 'user', 'text': user_message})
-
-            # TODO: Call your LLM API here, possibly passing 'offer' context as well
+            history.append({'role': 'user', 'content': user_message})
             llm_response = LLM_generate_reply(user_message, history, offer)
-            history.append({'role': 'bot', 'text': llm_response})
+            history.append({'role': 'system', 'content': llm_response})
 
             request.session[session_key] = history  # save updated history for this offer's chat
 
