@@ -1,4 +1,4 @@
-import time
+import markdown
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages as msg
@@ -8,8 +8,8 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import FormView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.utils.safestring import mark_safe
 from ..forms import *
-from ..models import *
 from ..services.custom_api import *
 from django.core.paginator import Paginator
 
@@ -315,11 +315,15 @@ class ChatView(LoginRequiredMixin, View):
     login_url = "/login"
     chat_id_key = "chat_id"
 
+    @staticmethod
+    def render_chat_message(raw_message):
+        html_message = markdown.markdown(raw_message)
+        return mark_safe(html_message)  # trust generated HTML
+
     def get(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
-        chat_id = None
         if request.session.get(self.chat_id_key) is None:
-            chat_id = create_chat()
+            chat_id = create_chat(offer, request.user)
             request.session["chat_id"] = chat_id
         else:
             chat_id = request.session.get("chat_id")
@@ -333,14 +337,26 @@ class ChatView(LoginRequiredMixin, View):
 
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
+        offer_text = rephraze_offer(offer)
         user_message = request.POST.get('message')
         chat_id = request.session.get("chat_id")
         session_key = f'chat_history_{chat_id}'
-        history = request.session.get(session_key, [])
+        history = request.session.get(session_key, [{
+                "role": "system",
+                "content": "You are an expert on credit offers."
+                           "Your skills of explaining a credit offer to customers is unmatched, providing clear and"
+                           "direct instructions to the customer. Maintain a polite and helpful tone." 
+                           f"The credit offer context is {offer_text}."
+                           "Please provide friendly feedback to any user questions only."
+                           "Respond in a short, concise manner, with your answers being only relevant to the user question."
+
+            }])
+        print(f"Message history: {history}, {session_key}, {user_message}")
         if user_message:
             history.append({'role': 'user', 'content': user_message})
-            llm_response = LLM_generate_reply(user_message, history, offer)
-            history.append({'role': 'system', 'content': llm_response})
+            llm_response = llm_generate_reply(history)
+            llm_response = self.render_chat_message(llm_response)
+            history.append({'role': 'assistant', 'content': llm_response})
 
             request.session[session_key] = history  # save updated history for this offer's chat
 
