@@ -30,14 +30,31 @@
                         </div>
                     {% endfor %}
                 </div>
-                <div class="card-footer bg-light">
-                    <form id="chat-form" method="post" class="d-flex" autocomplete="off">
+               <div class="card-footer bg-light">
+                    <!-- Row 1: Chat form (input + send) -->
+                    <form id="chat-form" method="post" class="d-flex mb-2" autocomplete="off">
                         {% csrf_token %}
-                        <input type="text" id="chat-input" name="message" class="form-control me-2" placeholder="Ihre Nachricht..." autocomplete="off" autofocus required>
+                        <input type="text" id="chat-input" name="message"
+                               class="form-control me-2"
+                               placeholder="Ihre Nachricht..."
+                               autocomplete="off"
+                               autofocus required>
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-send"></i> Senden
                         </button>
                     </form>
+
+                    <!-- Row 2: Save & Reset buttons -->
+                    <div class="d-flex gap-2">
+                        <button id="reset-save-btn" class="btn btn-secondary flex-fill" type="button">
+                            <i class="bi bi-floppy me-1"></i>
+                            Speichern & Zurücksetzen
+                        </button>
+                        <button id="reset-btn" class="btn btn-outline-danger flex-fill" type="button">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>
+                            Zurücksetzen
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -53,6 +70,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("chat-form");
     const input = document.getElementById("chat-input");
     const chatLog = document.getElementById("chat-log");
+    const resetSaveBtn = document.getElementById("reset-save-btn");
+    const resetBtn = document.getElementById("reset-btn");
 
     form.addEventListener("submit", function (e) {
         // If you don't want full page reload, remove the comment from e.preventDefault()
@@ -85,6 +104,49 @@ document.addEventListener("DOMContentLoaded", function () {
         // Auto scroll
         chatLog.scrollTop = chatLog.scrollHeight;
     });
+    resetSaveBtn.addEventListener("click", function () {
+        if (!confirm("Chatverlauf speichern und zurücksetzen?")) return;
+
+        fetch("{% url 'save_and_reset_chat' offer.id %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: JSON.stringify({
+                chat_id: "{{ chat_id }}",
+                message_history: "{{ messages }}",
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                }
+            })
+
+    });
+
+    resetBtn.addEventListener("click", function () {
+        if (!confirm("Zurücksetzen?")) return;
+
+        fetch("{% url 'reset_chat' offer.id %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: JSON.stringify({
+                chat_id: "{{ chat_id }}",
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                }
+            })
+
+    });
 });
 </script>
+
 {% endblock %}

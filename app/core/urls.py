@@ -1,4 +1,3 @@
-from django.contrib.auth.views import LogoutView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import *
@@ -8,7 +7,6 @@ router.register(r'customers', ClientViewSet)
 router.register(r'credit-offers', CreditOfferViewSet)
 router.register(r'users', UserViewSet)
 router.register(r'chats', ChatViewSet)
-router.register(r'messages', MessageViewSet)
 router.register(r'loans', LoanViewSet)
 
 
@@ -25,6 +23,8 @@ urlpatterns = [
     path('offer/<int:pk>/edit-email/', EditOfferEmailView.as_view(), name='edit_offer_email'),
     path('offer/<int:pk>/send-email/', SendOfferEmailView.as_view(), name='send_offer_email'),
     path("offer/<int:pk>/chat", ChatView.as_view(), name="chat_page"),
+    path('chat/<int:offer_id>/save_and_reset/', save_and_reset_chat, name='save_and_reset_chat'),
+    path('chat/<int:offer_id>/reset/', reset_chat, name='reset_chat'),
     path('admin-dashboard/', AdminDashboardView.as_view(), name='admin_dashboard'),
     path("manage/", ManageView.as_view(), name="manage"),
     path("manage/suggested-offers", ModeratorOffersView.as_view(), name="moderator_offers"),

@@ -7,3 +7,4 @@ class Chat(models.Model):
     time_ended = models.DateTimeField(auto_now=True)
     credit_offer = models.ForeignKey(CreditOffer, on_delete=models.CASCADE, default=1)
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    message_history = models.TextField(default="")

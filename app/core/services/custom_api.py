@@ -4,7 +4,9 @@ from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-import requests, os
+import requests
+import os
+import html
 
 from ..models import *
 
@@ -100,9 +102,8 @@ def rephraze_offer(offer):
 
     return "\n".join(context_lines)
 
-
-
-    
-
-
+def save_messages(chat_id, messages_list):
+    messages_redacted = html.unescape(messages_list)
+    print(f"Messages redacted: {messages_redacted}, type: {type(messages_redacted)}")
+    Chat.objects.filter(id=chat_id).update(message_history=messages_redacted)
 
