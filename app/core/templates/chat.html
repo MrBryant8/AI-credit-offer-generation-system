@@ -31,9 +31,9 @@
                     {% endfor %}
                 </div>
                 <div class="card-footer bg-light">
-                    <form method="post" class="d-flex" autocomplete="off">
+                    <form id="chat-form" method="post" class="d-flex" autocomplete="off">
                         {% csrf_token %}
-                        <input type="text" name="message" class="form-control me-2" placeholder="Ihre Nachricht..." autocomplete="off" autofocus required>
+                        <input type="text" id="chat-input" name="message" class="form-control me-2" placeholder="Ihre Nachricht..." autocomplete="off" autofocus required>
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-send"></i> Senden
                         </button>
@@ -43,6 +43,48 @@
         </div>
     </div>
 </div>
+
 <!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<!-- JS for Loading Spinner -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("chat-input");
+    const chatLog = document.getElementById("chat-log");
+
+    form.addEventListener("submit", function (e) {
+        // If you don't want full page reload, remove the comment from e.preventDefault()
+        // e.preventDefault();
+        const messageText = input.value.trim();
+
+        // 1. Append user's message instantly
+        const userBubble = `
+            <div class="mb-3 d-flex justify-content-end">
+                <div class="p-2 rounded bg-primary text-white">
+                    ${messageText}
+                </div>
+            </div>
+        `;
+        chatLog.insertAdjacentHTML("beforeend", userBubble);
+
+        // 2. Append assistant 'loading' bubble
+        const loadingBubble = `
+            <div id="loading-bubble" class="mb-3 d-flex justify-content-start">
+                <div class="p-2 rounded bg-light text-dark border">
+                    <i class="bi bi-robot me-1"></i>
+                    <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        chatLog.insertAdjacentHTML("beforeend", loadingBubble);
+
+        // Auto scroll
+        chatLog.scrollTop = chatLog.scrollHeight;
+    });
+});
+</script>
 {% endblock %}
