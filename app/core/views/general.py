@@ -11,7 +11,6 @@ from django.views.generic import FormView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.utils.safestring import mark_safe
 from rest_framework.utils import json
-
 from ..forms import *
 from ..services.custom_api import *
 from django.core.paginator import Paginator
@@ -120,7 +119,6 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, View):
             'clients': Client,
             'loans': Loan,
             'offers': CreditOffer,
-            'messages': Message,
             'chats': Chat,
         }
 
@@ -329,6 +327,16 @@ class ChatView(LoginRequiredMixin, View):
         return mark_safe(html_message)  # trust generated HTML
 
     def get(self, request, pk):
+        chat_id = request.GET.get("chat_id")
+        if chat_id:
+            chat = get_object_or_404(Chat, pk=chat_id)
+            if chat.user.id != request.user.id:
+                return HttpResponseForbidden()
+            request.session['chat_id'] = chat_id
+            if chat.message_history:
+                request.session[f'chat_history_{chat_id}'] = json.loads(chat.message_history)
+
+        all_chats = prepare_chat_list(self.request.user.id)
         offer = get_object_or_404(CreditOffer, pk=pk)
         if request.session.get(self.chat_id_key) is None:
             chat_id = create_chat(offer, request.user)
@@ -341,6 +349,7 @@ class ChatView(LoginRequiredMixin, View):
             'messages': history,
             'offer': offer,
             'chat_id': chat_id,
+            'chat_list': all_chats,
         }
         return render(request, self.template_name, context)
 
@@ -353,31 +362,28 @@ class ChatView(LoginRequiredMixin, View):
         history = request.session.get(session_key, [{
             "role": "system",
             "content": "You are an expert on credit offers."
-                       "Your skills of explaining a credit offer to customers is unmatched, providing clear and"
-                       "direct instructions to the customer. Maintain a polite and helpful tone."
-                       f"The credit offer context is {offer_text}."
-                       "Please provide friendly feedback to any user questions only."
+                       "Your skills of explaining a credit offer to customers is unmatched, providing clear and "
+                       "direct instructions to the customer. Maintain a polite and helpful tone. "
+                       f"The credit offer context is {offer_text}. "
+                       "Please provide friendly feedback to any user questions only. "
                        "Respond in a short, concise manner, with your answers being only relevant to the user question."
 
         }])
-        print(f"Message history: {history}, {session_key}, {user_message}")
+
         if user_message:
-            history.append({'role': 'user', 'content': user_message})
+            history.append({"role": "user", "content": user_message})
             llm_response = llm_generate_reply(history)
             llm_response = self.render_chat_message(llm_response)
-            history.append({'role': 'assistant', 'content': llm_response})
+            history.append({"role": "assistant", "content": llm_response})
 
-            request.session[session_key] = history  # save updated history for this offer's chat
+            request.session[session_key] = history
 
         return redirect('chat_page', pk=pk)
 
 
-@csrf_protect  # Or use @csrf_protect and handle CSRF as in your setup
+@csrf_protect
 def save_and_reset_chat(request, offer_id):
     if request.method == "POST":
-        # Save the chat here (archive to another model/table or just log/mark as saved)
-        # For now, just delete/reset all Chat messages linked to the offer
-        # (Adjust for your actual model structure!)
         data = json.loads(request.body)
         chat_id = data.get("chat_id")
         messages_list = data.get("message_history")

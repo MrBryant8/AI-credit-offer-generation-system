@@ -10,8 +10,8 @@ import html
 
 from ..models import *
 
-def add_new_user(first_name, last_name, email, password):
 
+def add_new_user(first_name, last_name, email, password):
     User = get_user_model()
 
     if User.objects.filter(email=email).exists():
@@ -30,14 +30,17 @@ def add_new_user(first_name, last_name, email, password):
         )
     return user
 
+
 def fetch_credit_offers_per_user(user_id):
     deactivate_old_credit_offers()
     credit_offers = CreditOffer.objects.filter(client_id=user_id)
     return credit_offers
 
+
 def deactivate_old_credit_offers():
     expiry_cutoff = timezone.now() - timedelta(weeks=1)
     CreditOffer.objects.filter(is_active=True, created_at__lt=expiry_cutoff).update(is_active=False)
+
 
 def llm_generate_reply(message_history: list):
     model_url = os.getenv("LLM_URL")
@@ -72,6 +75,7 @@ def create_chat(credit_offer, user):
     )
     return chat.id
 
+
 def rephraze_offer(offer):
     """
        Given a CreditOffer ID, returns all relevant relational data
@@ -102,8 +106,25 @@ def rephraze_offer(offer):
 
     return "\n".join(context_lines)
 
+
 def save_messages(chat_id, messages_list):
     messages_redacted = html.unescape(messages_list)
-    print(f"Messages redacted: {messages_redacted}, type: {type(messages_redacted)}")
-    Chat.objects.filter(id=chat_id).update(message_history=messages_redacted)
+    messages_redacted_json =(messages_redacted.
+                             replace("'role'", '"role"')
+                             .replace("'content'", '"content"')
+                             .replace("'user'", '"user"')
+                             .replace("'assistant'", '"assistant"')
+                             .replace("'system'", '"system"')
+                             .replace(": '", ': "')
+                             .replace("'}", '"}')
+                             .replace('"', '\"')
+                             .replace('\n', '\\n')
+                             .replace('\r', '\\r')
+                             .replace('\t', '\\t'))
 
+    Chat.objects.filter(id=chat_id).update(message_history=messages_redacted_json)
+
+
+def prepare_chat_list(user_id):
+    all_chats = Chat.objects.filter(user_id=user_id).order_by('id')
+    return all_chats
