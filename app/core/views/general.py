@@ -1,15 +1,17 @@
-import time
-from django.http import HttpResponseForbidden
+import markdown
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages as msg
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.messages import get_messages
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.generic import FormView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.utils.safestring import mark_safe
+from rest_framework.utils import json
 from ..forms import *
-from ..models import *
 from ..services.custom_api import *
 from django.core.paginator import Paginator
 
@@ -96,7 +98,7 @@ class CreditOfferDetailView(LoginRequiredMixin, DetailView):
         context['last_message'] = messages_list[-1] if messages_list else None
 
         return context
-    
+
 
 class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, View):
     login_url = '/login'
@@ -117,7 +119,6 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, View):
             'clients': Client,
             'loans': Loan,
             'offers': CreditOffer,
-            'messages': Message,
             'chats': Chat,
         }
 
@@ -167,9 +168,10 @@ class ModeratorOffersView(LoginRequiredMixin, UserPassesTestMixin, View):
         credit_offers = CreditOffer.objects.filter(is_active=True)
         return render(request, 'suggested-offers.html', {'credit_offers': credit_offers})
 
+
 class EditOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     login_url = '/login'
-    
+
     model = CreditOffer
     form_class = EditOfferEmailForm
     template_name = 'creditoffer_edit_email.html'
@@ -187,23 +189,23 @@ class EditOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
         return super().handle_no_permission()
 
+
 class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
     login_url = "/login"
-    
+
     def test_func(self):
         # For example: only moderators can send emails
         return self.request.user.is_moderator
-    
+
     def handle_no_permission(self):
         # Optionally redirect or raise 403
         if self.request.user.is_authenticated:
             return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
         return super().handle_no_permission()
 
-
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
-        
+
         # Implement your email sending logic here
         # e.g., using Django's send_mail or other email service
 
@@ -214,9 +216,10 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         # TODO needs more
         return redirect('offer_detail', pk=pk)
-    
+
+
 class AddCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
-    login_url="/login"
+    login_url = "/login"
     template_name = 'add-customer.html'
 
     def get(self, request):
@@ -244,17 +247,18 @@ class AddCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
             'user_form': user_form,
             'client_form': client_form,
         })
-    
+
     def test_func(self):
         return self.request.user.is_moderator
-    
+
     def handle_no_permission(self):
         if self.request.user.is_authenticated:
             return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
         return super().handle_no_permission()
-    
+
+
 class AcceptOfferView(LoginRequiredMixin, View):
-    login_url="/login"
+    login_url = "/login"
 
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
@@ -273,17 +277,18 @@ class AcceptOfferView(LoginRequiredMixin, View):
             msg.success(request, "Sie haben das Angebot angenommen.")
 
         return redirect('offer_detail', pk=pk)
-    
+
     def test_func(self):
         return not self.request.user.is_moderator
-    
+
     def handle_no_permission(self):
         if self.request.user.is_authenticated:
             return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
         return super().handle_no_permission()
 
+
 class RejectOfferView(LoginRequiredMixin, View):
-    login_url="/login"
+    login_url = "/login"
 
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
@@ -301,25 +306,40 @@ class RejectOfferView(LoginRequiredMixin, View):
             msg.success(request, "Sie haben das Angebot abgelehnt.")
 
         return redirect('offer_detail', pk=pk)
-    
+
     def test_func(self):
         return not self.request.user.is_moderator
-    
+
     def handle_no_permission(self):
         if self.request.user.is_authenticated:
             return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
         return super().handle_no_permission()
-    
+
+
 class ChatView(LoginRequiredMixin, View):
     template_name = 'chat.html'
     login_url = "/login"
     chat_id_key = "chat_id"
 
+    @staticmethod
+    def render_chat_message(raw_message):
+        html_message = markdown.markdown(raw_message)
+        return mark_safe(html_message)  # trust generated HTML
+
     def get(self, request, pk):
+        chat_id = request.GET.get("chat_id")
+        if chat_id:
+            chat = get_object_or_404(Chat, pk=chat_id)
+            if chat.user.id != request.user.id:
+                return HttpResponseForbidden()
+            request.session['chat_id'] = chat_id
+            if chat.message_history:
+                request.session[f'chat_history_{chat_id}'] = json.loads(chat.message_history)
+
+        all_chats = prepare_chat_list(self.request.user.id)
         offer = get_object_or_404(CreditOffer, pk=pk)
-        chat_id = None
         if request.session.get(self.chat_id_key) is None:
-            chat_id = create_chat()
+            chat_id = create_chat(offer, request.user)
             request.session["chat_id"] = chat_id
         else:
             chat_id = request.session.get("chat_id")
@@ -328,21 +348,67 @@ class ChatView(LoginRequiredMixin, View):
         context = {
             'messages': history,
             'offer': offer,
+            'chat_id': chat_id,
+            'chat_list': all_chats,
         }
         return render(request, self.template_name, context)
 
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
+        offer_text = rephraze_offer(offer)
         user_message = request.POST.get('message')
         chat_id = request.session.get("chat_id")
         session_key = f'chat_history_{chat_id}'
-        history = request.session.get(session_key, [])
-        if user_message:
-            history.append({'role': 'user', 'content': user_message})
-            llm_response = LLM_generate_reply(user_message, history, offer)
-            history.append({'role': 'system', 'content': llm_response})
+        history = request.session.get(session_key, [{
+            "role": "system",
+            "content": "You are an expert on credit offers."
+                       "Your skills of explaining a credit offer to customers is unmatched, providing clear and "
+                       "direct instructions to the customer. Maintain a polite and helpful tone. "
+                       f"The credit offer context is {offer_text}. "
+                       "Please provide friendly feedback to any user questions only. "
+                       "Respond in a short, concise manner, with your answers being only relevant to the user question."
 
-            request.session[session_key] = history  # save updated history for this offer's chat
+        }])
+
+        if user_message:
+            history.append({"role": "user", "content": user_message})
+            llm_response = llm_generate_reply(history)
+            llm_response = self.render_chat_message(llm_response)
+            history.append({"role": "assistant", "content": llm_response})
+
+            request.session[session_key] = history
 
         return redirect('chat_page', pk=pk)
-    
+
+
+@csrf_protect
+def save_and_reset_chat(request, offer_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        chat_id = data.get("chat_id")
+        messages_list = data.get("message_history")
+        save_messages(chat_id, messages_list)
+        if f'chat_history_{chat_id}' in request.session:
+            del request.session[f'chat_history_{chat_id}']
+            print("chat_history removed")
+        if 'chat_id' in request.session:
+            del request.session[f'chat_id']
+            print("chat_id removed")
+
+        return JsonResponse({
+            "redirect_url": reverse('chat_page', kwargs={"pk": offer_id})
+        }, status=200)
+
+@csrf_protect
+def reset_chat(request, offer_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        chat_id = data.get("chat_id")
+
+        if f'chat_history_{chat_id}' in request.session:
+            del request.session[f'chat_history_{chat_id}']
+            print("chat_history removed")
+
+        return JsonResponse({
+            "redirect_url": reverse('chat_page', kwargs={"pk": offer_id})
+        }, status=200)
