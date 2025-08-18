@@ -1,0 +1,32 @@
+feature,importance
+Credit_per_month,0.1475950791416076
+Credit amount,0.1425564244825467
+Age,0.10793717428714447
+Duration,0.09857914190403336
+Checking account_unknown,0.09625499311417156
+Job,0.04253580503730395
+Saving accounts_unknown,0.029360193539807285
+Sex_male,0.02607639337511141
+Checking account_moderate,0.02317035924864557
+Purpose_car,0.02239495055240555
+Housing_own,0.02161299518037281
+Purpose_radio/TV,0.020833480098614274
+Age_group_Middle_aged,0.018435474630148142
+Duration_category_Short,0.017178130128097293
+Credit_amount_category_Medium,0.017099022288004747
+Age_group_Young,0.016247761768689584
+Duration_category_Medium,0.016230384427882875
+Purpose_furniture/equipment,0.015521510597410089
+Saving accounts_moderate,0.014347920933069148
+Purpose_education,0.014183487919166654
+Housing_rent,0.013887962377108912
+Credit_amount_category_Low,0.013284429444447696
+Saving accounts_rich,0.011505132549338708
+Age_group_Senior,0.010789923516767873
+Checking account_rich,0.009888050749642364
+Saving accounts_quite rich,0.009816757795623141
+Duration_category_Very_long,0.009176643394852753
+Purpose_repairs,0.005659283417308817
+Credit_amount_category_Very_high,0.0050121310410649504
+Purpose_domestic appliances,0.0015333902935727084
+Purpose_vacation/others,0.0012956127660389953
