@@ -23,4 +23,9 @@ class REST:
         response = requests.patch(url, headers=self.headers, json={"risk_score": new_risk_score})
         print(response)
 
-    
+    def get_all_credit_offers(self):
+        url = f"{self.url}credit-offers/"
+        response = requests.get(url, headers=self.headers)
+        print(response)
+
+        
