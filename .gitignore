@@ -2,3 +2,5 @@
 frontend/node_modules
 frontend/build
 __pycache__
+.ipynb_checkpoints
+.idea
