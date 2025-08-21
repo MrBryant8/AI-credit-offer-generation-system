@@ -16,7 +16,19 @@ class UserLoginForm(forms.Form):
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
-        fields = ['age', 'is_employed', 'salary', 'current_debt', 'sex']
+        fields = [
+            "identity_number",  # required CharField(max_length=15)
+            "age",              # required IntegerField
+            "sex",              # CharField with choices
+            "job",              # IntegerField with choices
+            "housing",          # CharField with choices
+            "saving_account",   # CharField with choices
+            "checking_account", # CharField with choices
+            "credit_amount",    # required IntegerField
+            "duration",         # IntegerField (default=12)
+            "purpose",          # CharField with choices
+            "risk_score",       # optional
+        ]
 
 
 class EditOfferEmailForm(forms.ModelForm):

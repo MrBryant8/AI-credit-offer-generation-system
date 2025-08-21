@@ -1,17 +1,16 @@
 from abc import abstractmethod
 import joblib
 import pandas as pd
-import services.REST_Interface as rest
+from Client_REST_Interface import REST
 
 
 class ClientManager:
     def __init__(self):
-        self.rest=rest()
+        self.rest=REST()
     
     def check_for_new_clients(self):
         all_clients=self.rest.get_all_customers()
-        # filter the ones who don't have a risk score
-        new_clients= []
+        new_clients= self.get_new_clients(all_clients)
         return new_clients
 
     def predict_credit_risk(self, client):
@@ -20,7 +19,7 @@ class ClientManager:
         is_eligible = True if pipeline.predict_proba(client_df)[0, 1] > 0.5 else False
         return is_eligible
 
-    @abstractmethod
+    @staticmethod
     def generate_client_dataframe(client):
         # Prepare a dataframe with the same columns as training AFTER applying the same feature engineering.
         # If feature engineering was done outside the pipeline, ensure to replicate it here before calling predict/predict_proba.
@@ -33,16 +32,27 @@ class ClientManager:
             "Credit_amount_category": "Medium",
             "Duration_category": "Medium"
         }])
+        return df_new
 
-    @abstractmethod
+    @staticmethod
     def generate_additional_features(client_age, client_loan_duration, client_loan_ammount):
         pass
 
     def create_offer(self, client_id):
+        # TODO
         # fill up all attributes
         # send to agent to write an email
         # confirm and serialize
         # post request and save
-        pass
+        print(f"Offer generated for {client_id}")
 
+    
+    @staticmethod
+    def get_new_clients(clients_list_json):
+        new_clients = []
+        for client in clients_list_json:
+            if not client.get("risk_score"):
+                new_clients.append(client)
+
+        return new_clients
 

@@ -4,6 +4,7 @@ from ...models import Client, CreditOffer, Loan  # Replace yourapp with your app
 from django.utils import timezone
 import random
 
+
 class Command(BaseCommand):
     help = 'Seed database with users, clients, loans, and credit offers'
 
@@ -17,6 +18,8 @@ class Command(BaseCommand):
             {"first_name": "Alice", "last_name": "Müller", "email": "alice@smartcredit.com", "password": "alicepw"},
             {"first_name": "Bob", "last_name": "Klein", "email": "bob@smartcredit.com", "password": "bobpw"},
             {"first_name": "Carla", "last_name": "Schmidt", "email": "carla@smartcredit.com", "password": "carlapw"},
+            {"first_name": "David", "last_name": "Neumann", "email": "david@smartcredit.com", "password": "davidpw"},
+            {"first_name": "Eva", "last_name": "Fischer", "email": "eva@smartcredit.com", "password": "evapw"},
         ]
 
         created_users = []
@@ -92,27 +95,92 @@ class Command(BaseCommand):
             loans.append(loan)
 
         # 3. Create 5 clients
-        # For this example, assign some clients to some users, and others user=None
         clients_data = [
-            {"user_obj": created_users[0], "age": 30, "is_employed": True, "salary": 3500, "current_debt": 2000, "sex": "female", "risk_score": 50, "propensity_score": 70},
-            {"user_obj": created_users[1], "age": 45, "is_employed": True, "salary": 5000, "current_debt": 10000, "sex": "male", "risk_score": 30, "propensity_score": 60},
-            {"user_obj": created_users[2], "age": 22, "is_employed": False, "salary": 0, "current_debt": 0, "sex": "non-binary", "risk_score": 75, "propensity_score": 40},
-            {"user_obj": None, "age": 50, "is_employed": True, "salary": 7000, "current_debt": 15000, "sex": "male", "risk_score": 20, "propensity_score": 80},
-            {"user_obj": None, "age": 29, "is_employed": False, "salary": 0, "current_debt": 500, "sex": "female", "risk_score": 65, "propensity_score": 30},
-        ]
+    {
+        "user_obj": created_users[0],
+        "identity_number": random.randint(10**9, 10**10 - 1),
+        "age": 30,
+        "sex": Client.Sex.FEMALE,
+        "job": Client.Job.MEDIUM_SKILL,
+        "housing": Client.Housing.OWN,
+        "saving_account": Client.SavingsAccount.MODERATE,
+        "checking_account": Client.CheckingAccount.LITTLE,
+        "credit_amount": 3500,
+        "duration": 12,
+        "purpose": Client.Purpose.RADIO_OR_TV,
+    },
+    {
+        "user_obj": created_users[1],
+        "identity_number": random.randint(10**9, 10**10 - 1),
+        "age": 45,
+        "sex": Client.Sex.MALE,
+        "job": Client.Job.HIGH_SKILL,
+        "housing": Client.Housing.OWN,
+        "saving_account": Client.SavingsAccount.RICH,
+        "checking_account": Client.CheckingAccount.MODERATE,
+        "credit_amount": 10000,
+        "duration": 24,
+        "purpose": Client.Purpose.BUSINESS,
+        "risk_score": 30,
+    },
+    {
+        "user_obj": created_users[2],
+        "identity_number": random.randint(10**9, 10**10 - 1),
+        "age": 22,
+        "sex": Client.Sex.FEMALE,
+        "job": Client.Job.JOBLESS,
+        "housing": Client.Housing.RENT,
+        "saving_account": Client.SavingsAccount.NA,
+        "checking_account": Client.CheckingAccount.NA,
+        "credit_amount": 0,
+        "duration": 6,
+        "purpose": Client.Purpose.EDUCATION,
+        "risk_score": 75,
+    },
+    {
+        "user_obj": created_users[3],
+        "identity_number": random.randint(10**9, 10**10 - 1),
+        "age": 50,
+        "sex": Client.Sex.MALE,
+        "job": Client.Job.HIGH_SKILL,
+        "housing": Client.Housing.OWN,
+        "saving_account": Client.SavingsAccount.QUITE_RICH,
+        "checking_account": Client.CheckingAccount.MODERATE,
+        "credit_amount": 15000,
+        "duration": 36,
+        "purpose": Client.Purpose.CAR,
+    },
+    {
+        "user_obj": created_users[4],
+        "identity_number": random.randint(10**9, 10**10 - 1),
+        "age": 29,
+        "sex": Client.Sex.FEMALE,
+        "job": Client.Job.LOW_SKILL,
+        "housing": Client.Housing.RENT,
+        "saving_account": Client.SavingsAccount.LITTLE,
+        "checking_account": Client.CheckingAccount.LITTLE,
+        "credit_amount": 500,
+        "duration": 9,
+        "purpose": Client.Purpose.RADIO_OR_TV,
+    },
+]
 
         clients = []
         for cd in clients_data:
             client, created = Client.objects.get_or_create(
-                user_id=cd["user_obj"]._get_pk_val() if cd["user_obj"] else None,
-                age=cd["age"],
+                user=cd["user_obj"],
                 defaults={
-                    "is_employed": cd["is_employed"],
-                    "salary": cd["salary"],
-                    "current_debt": cd["current_debt"],
+                    "age": cd["age"],
+                    "identity_number": cd["identity_number"],
                     "sex": cd["sex"],
-                    "risk_score": cd["risk_score"],
-                    "propensity_score": cd["propensity_score"],
+                    "job": cd["job"],
+                    "housing": cd["housing"],
+                    "saving_account": cd["saving_account"],
+                    "checking_account": cd["checking_account"],
+                    "credit_amount": cd["credit_amount"],
+                    "duration": cd["duration"],
+                    "purpose": cd["purpose"],
+                    "risk_score": cd.get("risk_score"),
                 }
             )
             if created:

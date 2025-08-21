@@ -44,10 +44,10 @@ services:
             context: ./services/client_management
             dockerfile: Dockerfile
         container_name: client_management
-        profiles: ["manual"]
+        # profiles: ["manual"]
         restart: "no"
         volumes:
-            - ./ml/output:/usr/src/services/client_management
+            - ./ml/output:/usr/src/services/client_management/ml/output
         depends_on:
             - django
 
