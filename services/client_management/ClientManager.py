@@ -38,12 +38,11 @@ class ClientManager:
     def generate_additional_features(client_age, client_loan_duration, client_loan_ammount):
         pass
 
-    def create_offer(self, client_id):
-        # TODO
-        # fill up all attributes
-        # send to agent to write an email
-        # confirm and serialize
-        # post request and save
+    def create_offer(self, client_id, amount_requested):
+
+        loan_types = self.rest.get_all_loan_types()
+        loan_type_id = self.determine_loan_type(loan_types, amount_requested)
+
         print(f"Offer generated for {client_id}")
 
     
@@ -55,4 +54,11 @@ class ClientManager:
                 new_clients.append(client)
 
         return new_clients
+
+    @staticmethod
+    def determine_loan_type(loan_types, amount):
+        for loan in loan_types:
+            if loan.amount_start < amount < loan.amount_end:
+                return loan.id
+
 

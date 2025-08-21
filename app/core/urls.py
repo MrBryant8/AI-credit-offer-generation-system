@@ -29,5 +29,6 @@ urlpatterns = [
     path("manage/", ManageView.as_view(), name="manage"),
     path("manage/suggested-offers", ModeratorOffersView.as_view(), name="moderator_offers"),
     path("manage/add-customer", AddCustomerView.as_view(), name="add_customer"),
+    path("create-email/", write_email, name="create_email"),
     path('api/', include(router.urls))
 ]

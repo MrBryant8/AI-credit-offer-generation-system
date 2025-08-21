@@ -1,5 +1,5 @@
 import markdown
-from django.http import HttpResponseForbidden, JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages as msg
 from django.contrib.auth import authenticate, login, logout
@@ -14,6 +14,7 @@ from rest_framework.utils import json
 from ..forms import *
 from ..services.custom_api import *
 from django.core.paginator import Paginator
+from .crews.crew_manager import kickoff_crew
 
 
 class LandingPageView(View):
@@ -23,7 +24,13 @@ class LandingPageView(View):
 
 class HomePageView(View):
     def get(self, request):
-        return render(request, 'home.html', )
+        return render(request, 'home.html')
+
+@csrf_exempt
+def write_email(request):
+    if request.method == "POST":
+        result = kickoff_crew({"topic":"Football corruption"})
+        return JsonResponse({"result": result})
 
 
 class LoginPageView(FormView):
