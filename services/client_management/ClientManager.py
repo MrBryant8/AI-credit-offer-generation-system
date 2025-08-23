@@ -14,10 +14,9 @@ class ClientManager:
     def predict_credit_risk(self, client):
         pipeline = joblib.load("ml/output/credit_risk_pipeline.joblib")
         client_df = self.generate_client_dataframe(client)
-        proba_bad = pipeline.predict_proba(client_df)[0, 1]
-        self.rest.add_risk_score_to_customer(client.get("id"), proba_bad)
-        is_eligible = True if proba_bad < 0.5 else False
-        return is_eligible
+        low_risk_probability = pipeline.predict_proba(client_df)[0, 1]
+        self.rest.add_risk_score_to_customer(client.get("id"), low_risk_probability)
+        return low_risk_probability
 
 
     def generate_client_dataframe(self, client):
@@ -62,7 +61,7 @@ class ClientManager:
         loan_type_desc = "The perfect loan for small buying and a solid ground for something bigger." if not loan_type else loan_type.get("description")
         loan_type_id = 0 if not loan_type else loan_type.get("id")
         email_json = self.rest.generate_email(client, loan_type_desc, user_name, details_link)
-
+  
         offer_saved = self.rest.save_offer(client.get("id"), loan_type_id, email_json)
 
         if offer_saved:

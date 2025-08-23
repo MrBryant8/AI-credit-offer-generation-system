@@ -58,4 +58,4 @@ class Client(models.Model):
     credit_amount = models.IntegerField(null=False, blank=False)
     duration = models.IntegerField(null=False, blank=False, default=12)
     purpose = models.CharField(max_length=100, null=False, choices=Purpose.choices)
-    risk_score = models.IntegerField(null=True, blank=True)
+    risk_score = models.FloatField(null=True, blank=True)

@@ -24,9 +24,6 @@ class REST:
             timeout=30
         )
         
-        print(f"Status Code: {response.status_code}")
-        print(f"Response Text: {response.text}")
-        print(f"Response Headers: {response.headers}")
         if response.status_code == 200:
             print(f"Added new risk_score {new_risk_score} to customer {customer_id}")
 
@@ -59,12 +56,11 @@ class REST:
             "details_link": f"{details_link}"
         }
 
-        # Set headers for JSON
         headers = self.headers.copy()
         headers["Accept"] = "application/json"
 
         response = requests.post(url, json=payload, headers=headers, timeout=60)
-        return response.json()
+        return response.text
     
     def save_offer(self, client_type_id, loan_type_id, email_content):
         url = f"{self.rest_url}/credit-offers/"
