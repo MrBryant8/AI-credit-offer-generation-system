@@ -21,6 +21,7 @@ class ClientManager:
 
     @staticmethod
     def generate_client_dataframe(client):
+        # TODO
         # Prepare a dataframe with the same columns as training AFTER applying the same feature engineering.
         # If feature engineering was done outside the pipeline, ensure to replicate it here before calling predict/predict_proba.
         df_new = pd.DataFrame([{
@@ -36,14 +37,29 @@ class ClientManager:
 
     @staticmethod
     def generate_additional_features(client_age, client_loan_duration, client_loan_ammount):
+        #TODO 
         pass
 
-    def create_offer(self, client_id, amount_requested):
+    def create_offer(self, client):
 
         loan_types = self.rest.get_all_loan_types()
-        loan_type_id = self.determine_loan_type(loan_types, amount_requested)
+        loan_type = self.determine_loan_type(loan_types, client.get("credit_amount"))
+        user_name = self.get_user_name_from_client(client.get("user"))
 
-        print(f"Offer generated for {client_id}")
+        new_offer_id = self.get_next_offer_id()
+        details_link = f"http://localhost:8000/offers/{new_offer_id}"
+
+        loan_type_desc = "The perfect loan for small buying and a solid ground for something bigger." if not loan_type else loan_type.get("description")
+        loan_type_id = 0 if not loan_type else loan_type.get("id")
+        email_json = self.rest.generate_email(client, loan_type_desc, user_name, details_link)
+
+        offer_saved, offer_id = self.rest.save_offer(client.get("id"), loan_type_id, email_json)
+
+        print(new_offer_id, offer_id)
+        if offer_saved and offer_id == new_offer_id:
+            print(f"Offer generated for {user_name}")
+        else:
+            print(f"Offer couldn't be saved for {user_name}")
 
     
     @staticmethod
@@ -58,7 +74,15 @@ class ClientManager:
     @staticmethod
     def determine_loan_type(loan_types, amount):
         for loan in loan_types:
-            if loan.amount_start < amount < loan.amount_end:
-                return loan.id
-
+            if loan.get("amount_start") < amount < loan.get("amount_end"):
+                return loan
+            
+    def get_user_name_from_client(self, client_user_id):
+        user = self.rest.get_user_by_user_id(client_user_id)
+        return f"{user.get("first_name")} {user.get("last_name")}"
+    
+    def get_next_offer_id(self):
+        offers = self.rest.get_all_credit_offers()
+        return int(offers[-1].get("id")) + 1
+    
 

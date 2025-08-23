@@ -14,7 +14,7 @@ from rest_framework.utils import json
 from ..forms import *
 from ..services.custom_api import *
 from django.core.paginator import Paginator
-from .crews.crew_manager import kickoff_crew
+from .agents.crew import EmailCrew
 
 
 class LandingPageView(View):
@@ -28,9 +28,37 @@ class HomePageView(View):
 
 @csrf_exempt
 def write_email(request):
+    
+    if request.content_type != 'application/json':
+        return JsonResponse({
+            'error': 'Content-Type must be application/json'
+        }, status=400)
+    
     if request.method == "POST":
-        result = kickoff_crew({"topic":"Football corruption"})
-        return JsonResponse({"result": result})
+        data = {}
+        try:
+                data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'error': 'Invalid JSON in request body'
+            }, status=400)
+        
+        inputs = {
+            "client_name": data.get("name"),
+            "client_age": data.get("age"),
+            "client_sex": data.get("sex"),
+            "loan_purpose": data.get("loan_purpose"),
+            "loan_amount": data.get("loan_amount"),
+            "loan_duration": data.get("loan_duration"),
+            "loan_type_description": data.get("loan_description"),
+            "more_details_link": data.get("details_link"),
+            "bank_address": "ul. Kliment Ohridski, 18, Sofia",
+            "bank_phone_number": "0871111111"
+            }
+
+        result = EmailCrew().crew().kickoff(inputs=inputs).json
+
+        return JsonResponse(result, status=200, safe=False)
 
 
 class LoginPageView(FormView):

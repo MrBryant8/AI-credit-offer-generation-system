@@ -1,0 +1,34 @@
+# src/latest_ai_development/config/tasks.yaml
+credit_approval_email_task:
+  description: >
+    Draft a professional and compliant credit approval email using the provided client, offer,
+    and company context. The email must clearly present the approved offer details, next steps,
+    and any required documents, while maintaining a courteous, trustworthy tone appropriate
+    for a regulated financial institution. At the end the recepient should be prompted to view the offer details via {more_details_link}. 
+    The client name is {client_name}. The client is requesting the loan of {loan_amount} in euros, that he pledges to pay for approximately {loan_duration} in months.
+    When describing the loan, adhere to the generic loan description, provided by the credit bank - {loan_type_description}. 
+    Also please keep in mind the demographic details of the person sucha as age - {client_age}, sex - {client_sex}.
+    Do not explicitly mention them, just adjust your tone based on the client's demographic situation, so that the email sounds more appealing to the client.
+    As next steps, make sure to prompt the user to accept the offer, if they like it, and book a consulting hour with a specialist at {bank_address} through {bank_phone_number}.
+    Make sure to end the email with a formal regard from SmartCredit.
+  expected_output: >
+    A draft email that should follow the 
+    specified structure and formatting guidelines.
+  agent: email_assistant
+
+email_qa_task:
+  description: >
+    "Review the response drafted by the Senior Email Specialist. 
+    Ensure that the email is comprehensive, accurate, and adheres to the high-quality standards expected for a credit company. 
+    Verify that all parts of the email have been addressed thoroughly, with a helpful and friendly tone. Verify that the email ends with a formal regard from SmartCredit."
+  expected_output: >
+   "A final, detailed, and informative email about the credit offer ready to be sent to the customer.
+    Don't be too formal, we are a chill and cool company but maintain a professional and friendly tone throughout.
+    IMPORTANT: Always return your response as a valid JSON object with the following structure:
+    {
+        "subject": "email subject line",
+        "email_text": "plain text email body",
+    }
+    
+    Do not include any text before or after the JSON object.
+  agent: email_qa_agent

@@ -7,7 +7,8 @@ def run_pipeline():
     for client in new_clients:
         risk = cm.predict_credit_risk(client)
         if risk < 0.5:
-            cm.create_offer(client.get("id"))
+            cm.create_offer(client)
+            break #TODO: remove when not in dev
 
 
 

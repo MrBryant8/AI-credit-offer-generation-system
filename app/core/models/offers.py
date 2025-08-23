@@ -13,5 +13,5 @@ class CreditOffer(models.Model):
     moderator_feedback = models.TextField(null=True, blank=True)
     is_draft = models.BooleanField(default=True)
     is_accepted = models.BooleanField(null=True, blank=True)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
 
