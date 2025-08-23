@@ -14,15 +14,21 @@ class REST:
         response = requests.get(url, headers=self.headers)
         return response.json()
 
-    def get_customer_by_id(self, id):
-        url = f"{self.rest_url}/customers/{id}/"
-        response = requests.get(url, headers=self.headers)
-        print(response)
-
     def add_risk_score_to_customer(self, customer_id, new_risk_score):
         url = f"{self.rest_url}/customers/{customer_id}/"
-        response = requests.patch(url, headers=self.headers, json={"risk_score": new_risk_score})
-        print(response)
+        payload = {"risk_score": new_risk_score}
+        response = requests.patch(
+            url, 
+            headers=self.headers, 
+            json=payload,
+            timeout=30
+        )
+        
+        print(f"Status Code: {response.status_code}")
+        print(f"Response Text: {response.text}")
+        print(f"Response Headers: {response.headers}")
+        if response.status_code == 200:
+            print(f"Added new risk_score {new_risk_score} to customer {customer_id}")
 
     def get_all_credit_offers(self):
         url = f"{self.rest_url}/credit-offers/"
@@ -68,8 +74,4 @@ class REST:
             "email_content": email_content
         }
         response = requests.post(url, json=payload, headers=self.headers, timeout=60)
-        return 200 <= response.status_code < 300, response.json().get("id")
-
-
-
-        
+        return 200 <= response.status_code < 300
