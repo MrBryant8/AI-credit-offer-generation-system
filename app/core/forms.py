@@ -12,7 +12,7 @@ class UserLoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
 
-class UserClientAddForm(forms.ModelForm):
+class UserManageForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['email', 'first_name', 'last_name']
@@ -32,11 +32,6 @@ class AddClientForm(forms.ModelForm):
             "duration",         # IntegerField (default=12)
             "purpose",          # CharField with choices
         ]
-
-class UserClientEditForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = ['email', 'first_name', 'last_name']
 
 
 class EditClientForm(forms.ModelForm):

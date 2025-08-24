@@ -258,7 +258,7 @@ class AddCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'add-customer.html'
 
     def get(self, request):
-        user_form = UserClientAddForm()
+        user_form = UserManageForm()
         client_form = AddClientForm()
         return render(request, self.template_name, {
             'user_form': user_form,
@@ -266,7 +266,7 @@ class AddCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
         })
 
     def post(self, request):
-        user_form = UserClientAddForm(request.POST)
+        user_form = UserManageForm(request.POST)
         client_form = AddClientForm(request.POST)
         if user_form.is_valid() and client_form.is_valid():
             user = user_form.save(commit=False)
@@ -327,15 +327,24 @@ class EditCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
     login_url = "/login"
     template_name = 'edit-customer.html'
 
+    def test_func(self):
+        return self.request.user.is_moderator
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("Sie haben keine Berechtigung, diesen Kunden zu bearbeiten.")
+        return super().handle_no_permission()
+
     def get(self, request, pk):
         # Get the client instance to edit
         client = get_object_or_404(Client, pk=pk)
         
-        # Pre-fill the form with existing client data
         client_form = EditClientForm(instance=client)
+        user_form = UserManageForm(instance=client.user)
         
         return render(request, self.template_name, {
             'client_form': client_form,
+            'user_form': user_form,
             'client': client,
             'is_editing': True,
         })
@@ -344,31 +353,29 @@ class EditCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
         # Get the client instance to update
         client = get_object_or_404(Client, pk=pk)
         
-        # Create form with POST data and existing instance
+        # Create both forms with POST data and existing instances
         client_form = EditClientForm(request.POST, instance=client)
+        user_form = UserManageForm(request.POST, instance=client.user)
         
-        if client_form.is_valid():
+        if client_form.is_valid() and user_form.is_valid():
+            # Save user information first
+            user = user_form.save()
+            
+            # Save client information
             client = client_form.save(commit=False)
+            client.user = user  # Ensure the relationship is maintained
             client.save()
-            msg.success(request, f"Kunde {client.user.first_name} {client.user.last_name} wurde erfolgreich aktualisiert.")
-            return redirect('edit_customers')  # Redirect back to customer list
+            
+            msg.success(request, f"Kunde {user.first_name} {user.last_name} wurde erfolgreich aktualisiert.")
+            return redirect('edit_customers')
         
-        # If form is invalid, re-render page with errors
+        # If forms are invalid, re-render page with errors
         return render(request, self.template_name, {
             'client_form': client_form,
+            'user_form': user_form,
             'client': client,
             'is_editing': True,
         })
-
-
-    def test_func(self):
-        return self.request.user.is_moderator
-
-    def handle_no_permission(self):
-        if self.request.user.is_authenticated:
-            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
-        return super().handle_no_permission()
-
 
 class AcceptOfferView(LoginRequiredMixin, View):
     login_url = "/login"
