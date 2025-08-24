@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.generic import FormView, DetailView, UpdateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.utils.safestring import mark_safe
+from django.conf import settings
 from rest_framework.utils import json
 from ..forms import *
 from ..services.custom_api import *
@@ -241,17 +242,73 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
 
-        # TODO: 
-        # Implement your email sending logic here
-        # e.g., using Django's send_mail or other email service
+       # Check if email content exists
+        if not offer.email_content:
+            msg.error(request, "Keine E-Mail-Inhalte für dieses Angebot verfügbar.")
+            return redirect('offer_detail', pk=pk)
 
-        # Example (pseudo):
-        # send_offer_email(offer)
+        
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@smartcredit.com')
+        to_email = ["mincho.ta@gmail.com"] # TODO: change to [offer.client.user.email] for real customers
 
-        msg.success(request, f"E-Mail für Angebot #{offer.id} wurde erfolgreich versandt.")
+        try:
+            # Send simple email using the content from email_content field
+            from django.core.mail import send_mail, EmailMultiAlternatives
+            email_content_redacted = self.redact_email_content(offer.email_content)
+             # Create multipart email
+            email = EmailMultiAlternatives(
+                subject=offer.email_subject or f"Ihr Kreditangebot #{offer.id}",
+                body=offer.email_content,  # Plain text version
+                from_email=from_email,
+                to=to_email
+            )
+            email.attach_alternative(email_content_redacted, "text/html")
+    
+            email_sent_count = email.send(fail_silently=False)
+            
+            if email_sent_count == 1:
+                offer.is_draft = False
+                offer.is_active = True
+                offer.save()
+
+                msg.success(request, f"E-Mail für Angebot #{offer.id} wurde erfolgreich an {to_email[0]} versandt.")
+
+        except Exception as e:
+            print("FAILURE")
+            msg.error(request, f"Fehler beim Versenden der E-Mail: {str(e)}")
 
         return redirect('offer_detail', pk=pk)
+    
+    @staticmethod
+    def redact_email_content(email_content:str):
+        """
+        Convert email_content markdown to HTML
+        """
+        if not email_content:
+            return ""
+        
+        import html
+        import re
+         # First, find all blocks containing lines starting with "* "
+        def block_replacer(match):
+            block = match.group(0)
+            # Replace each bullet line with HTML <li>
+            items = re.findall(r'^\* (.+)', block, re.MULTILINE)
+            lis = ''.join(f'<li>{item}</li>' for item in items)
+            return f'<ul>{lis}</ul>'
 
+        # Escape HTML characters
+        escaped_text = html.escape(email_content)
+        
+        # Convert **bold** to <strong>
+        escaped_text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', escaped_text)
+
+        escaped_text = re.sub(r'(?:^\* .+\n?)+', block_replacer, escaped_text, flags=re.MULTILINE)
+        # Convert line breaks to <br>
+        escaped_text = escaped_text.replace('\n', '<br>')
+        
+        return escaped_text
+    
 
 class AddCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
     login_url = "/login"
@@ -364,6 +421,7 @@ class EditCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
             # Save client information
             client = client_form.save(commit=False)
             client.user = user  # Ensure the relationship is maintained
+            client.risk_score = None
             client.save()
             
             msg.success(request, f"Kunde {user.first_name} {user.last_name} wurde erfolgreich aktualisiert.")
