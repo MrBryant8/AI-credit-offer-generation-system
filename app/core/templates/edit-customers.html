@@ -1,0 +1,149 @@
+{% extends 'index.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-people me-2"></i>Kundenauswahl</h2>
+        <a href="{% url 'manage' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Zurück
+        </a>
+    </div>
+
+    <!-- Search Form -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-8">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                <input type="search" 
+                       name="q" 
+                       value="{{ search_query }}" 
+                       class="form-control" 
+                       placeholder="Nach Identitätsnummer suchen..." 
+                       aria-label="Suche nach Identitätsnummer">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary me-2">
+                <i class="bi bi-search me-1"></i>Suchen
+            </button>
+            {% if search_query %}
+                <a href="{% url 'edit_customers' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-1"></i>Zurücksetzen
+                </a>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if search_query %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Suchergebnisse für Identitätsnummer: <strong>"{{ search_query }}"</strong>
+            ({{ customers|length }} {% if customers|length == 1 %}Kunde{% else %}Kunden{% endif %} gefunden)
+        </div>
+    {% endif %}
+
+    {% if customers %}
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-list me-2"></i>Kunden</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for customer in customers %}
+                    <a href="{% url 'edit_customer' customer.id %}" 
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+                        <div>
+                            <h6 class="mb-1">
+                                <i class="bi bi-person me-2 text-primary"></i>
+                                {{ customer.user.first_name }} {{ customer.user.last_name }}
+                            </h6>
+                            <small class="text-muted">
+                                <i class="bi bi-credit-card me-1"></i>ID: {{ customer.identity_number }}
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block">
+                                <i class="bi bi-envelope me-1"></i>{{ customer.user.email }}
+                            </small>
+                            <small class="text-primary">
+                                <i class="bi bi-pencil me-1"></i>Bearbeiten
+                            </small>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+            <nav aria-label="Seitennavigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ search_query }}&page=1" aria-label="Erste Seite">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ search_query }}&page={{ page_obj.previous_page_number }}" aria-label="Vorherige">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in paginator.page_range %}
+                        {% if num == page_obj.number %}
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?q={{ search_query }}&page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ search_query }}&page={{ page_obj.next_page_number }}" aria-label="Nächste">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ search_query }}&page={{ paginator.num_pages }}" aria-label="Letzte Seite">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <div class="text-center text-muted mt-2">
+                Seite {{ page_obj.number }} von {{ paginator.num_pages }} 
+                ({{ paginator.count }} {% if paginator.count == 1 %}Kunde{% else %}Kunden{% endif %} insgesamt)
+            </div>
+        {% endif %}
+
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+            <h4 class="text-muted mt-3">
+                {% if search_query %}
+                    Keine Kunden mit Identitätsnummer "{{ search_query }}" gefunden
+                {% else %}
+                    Noch keine Kunden vorhanden
+                {% endif %}
+            </h4>
+            <p class="text-muted">
+                {% if search_query %}
+                    Überprüfen Sie die Identitätsnummer oder 
+                    <a href="{% url 'edit_customers' %}">alle Kunden anzeigen</a>
+                {% else %}
+                    Geben Sie eine Identitätsnummer in das Suchfeld ein
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

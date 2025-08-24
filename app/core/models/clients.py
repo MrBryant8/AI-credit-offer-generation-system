@@ -48,7 +48,7 @@ class Client(models.Model):
         null=True,
         blank=True
     )
-    identity_number = models.CharField(max_length=15, null=False)
+    identity_number = models.CharField(max_length=15, null=False, unique=True)
     age = models.IntegerField(null=False, blank=False, default=18)
     sex = models.CharField(max_length=10, choices=Sex.choices, null=True)
     job = models.IntegerField(null=False, blank=False, choices=[(j.value, j.name.title()) for j in Job])

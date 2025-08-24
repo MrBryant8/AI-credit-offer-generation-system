@@ -12,8 +12,12 @@ class UserLoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
 
+class UserClientAddForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'last_name']
 
-class ClientForm(forms.ModelForm):
+class AddClientForm(forms.ModelForm):
     class Meta:
         model = Client
         fields = [
@@ -27,8 +31,29 @@ class ClientForm(forms.ModelForm):
             "credit_amount",    # required IntegerField
             "duration",         # IntegerField (default=12)
             "purpose",          # CharField with choices
-            "risk_score",       # optional
         ]
+
+class UserClientEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'last_name']
+
+
+class EditClientForm(forms.ModelForm):
+    class Meta:
+        model = Client
+        fields = [
+            "age",              # required IntegerField
+            "sex",              # CharField with choices
+            "job",              # IntegerField with choices
+            "housing",          # CharField with choices
+            "saving_account",   # CharField with choices
+            "checking_account", # CharField with choices
+            "credit_amount",    # required IntegerField
+            "duration",         # IntegerField (default=12)
+            "purpose",          # CharField with choices
+        ]
+
 
 
 class EditOfferEmailForm(forms.ModelForm):

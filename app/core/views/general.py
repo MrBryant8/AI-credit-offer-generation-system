@@ -7,7 +7,7 @@ from django.contrib.messages import get_messages
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from django.views.generic import FormView, DetailView, UpdateView
+from django.views.generic import FormView, DetailView, UpdateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.utils.safestring import mark_safe
 from rest_framework.utils import json
@@ -241,6 +241,7 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
 
+        # TODO: 
         # Implement your email sending logic here
         # e.g., using Django's send_mail or other email service
 
@@ -249,7 +250,6 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         msg.success(request, f"E-Mail für Angebot #{offer.id} wurde erfolgreich versandt.")
 
-        # TODO needs more
         return redirect('offer_detail', pk=pk)
 
 
@@ -258,19 +258,19 @@ class AddCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'add-customer.html'
 
     def get(self, request):
-        user_form = UserRegisterForm()
-        client_form = ClientForm()
+        user_form = UserClientAddForm()
+        client_form = AddClientForm()
         return render(request, self.template_name, {
             'user_form': user_form,
             'client_form': client_form,
         })
 
     def post(self, request):
-        user_form = UserRegisterForm(request.POST)
-        client_form = ClientForm(request.POST)
+        user_form = UserClientAddForm(request.POST)
+        client_form = AddClientForm(request.POST)
         if user_form.is_valid() and client_form.is_valid():
             user = user_form.save(commit=False)
-            user.set_password(user_form.cleaned_data['password'])
+            user.set_password(client_form.cleaned_data['identity_number'])
             user.save()
             client = client_form.save(commit=False)
             client.user = user
@@ -282,6 +282,84 @@ class AddCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
             'user_form': user_form,
             'client_form': client_form,
         })
+
+    def test_func(self):
+        return self.request.user.is_moderator
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
+        return super().handle_no_permission()
+
+class EditCustomersView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    login_url = "/login"
+    model = Client
+    template_name = 'edit-customers.html'
+    context_object_name = 'customers'
+    paginate_by = 10
+
+    def test_func(self):
+        # Only staff members can access this view
+        return self.request.user.is_moderator
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        query = self.request.GET.get('q', '')
+        
+        if query:
+            # Search by identity number
+            queryset = queryset.filter(identity_number__icontains=query)
+        
+        return queryset.order_by('user__last_name', 'user__first_name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('q', '')
+        return context
+    
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
+        return super().handle_no_permission()
+
+    
+class EditCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
+    login_url = "/login"
+    template_name = 'edit-customer.html'
+
+    def get(self, request, pk):
+        # Get the client instance to edit
+        client = get_object_or_404(Client, pk=pk)
+        
+        # Pre-fill the form with existing client data
+        client_form = EditClientForm(instance=client)
+        
+        return render(request, self.template_name, {
+            'client_form': client_form,
+            'client': client,
+            'is_editing': True,
+        })
+
+    def post(self, request, pk):
+        # Get the client instance to update
+        client = get_object_or_404(Client, pk=pk)
+        
+        # Create form with POST data and existing instance
+        client_form = EditClientForm(request.POST, instance=client)
+        
+        if client_form.is_valid():
+            client = client_form.save(commit=False)
+            client.save()
+            msg.success(request, f"Kunde {client.user.first_name} {client.user.last_name} wurde erfolgreich aktualisiert.")
+            return redirect('edit_customers')  # Redirect back to customer list
+        
+        # If form is invalid, re-render page with errors
+        return render(request, self.template_name, {
+            'client_form': client_form,
+            'client': client,
+            'is_editing': True,
+        })
+
 
     def test_func(self):
         return self.request.user.is_moderator

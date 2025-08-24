@@ -2,93 +2,86 @@
 {% load form_filter %}
 
 {% block content %}
+
 <div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-md-12 col-lg-10">
+        <div class="col-md-10 col-lg-9">
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="bi bi-person-plus me-2"></i>Neuen Kunden anlegen</h4>
+                <div class="card-header bg-warning text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="bi bi-person-gear me-2"></i>
+                            Kunde bearbeiten: {{ client.user.first_name }} {{ client.user.last_name }}
+                        </h4>
+                        <a href="{% url 'edit_customers' %}" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>Zurück zur Liste
+                        </a>
+                    </div>
                 </div>
                 
                 <div class="card-body">
+                    <!-- Customer Information Summary -->
+                    <div class="alert alert-info mb-4">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong><i class="bi bi-credit-card me-1"></i>Identitätsnummer:</strong><br>
+                                {{ client.identity_number }}
+                            </div>
+                            <div class="col-md-4">
+                                <strong><i class="bi bi-envelope me-1"></i>E-Mail:</strong><br>
+                                {{ client.user.email }}
+                            </div>
+                            <div class="col-md-4">
+                                <strong><i class="bi bi-calendar me-1"></i>Registriert:</strong><br>
+                                {{ client.user.date_joined|date:"d.m.Y" }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Form -->
                     <form method="post">
                         {% csrf_token %}
                         
                         <div class="row">
-                            <!-- Left Column - User Form -->
+                            <!-- User Information Column -->
                             <div class="col-md-5 border-end pe-md-4">
                                 <fieldset>
-                                    <legend class="fs-5 mb-3 text-primary">
+                                    <legend class="fs-5 mb-3 text-warning">
                                         <i class="bi bi-person-circle me-2"></i>Benutzerdaten
                                     </legend>
 
-                                    <!-- First Name Field -->
-                                    <div class="mb-3">
-                                        <label for="{{ user_form.first_name.id_for_label }}" class="form-label">
-                                            {{ user_form.first_name.label }}
-                                            {% if user_form.first_name.field.required %}<span class="text-danger">*</span>{% endif %}
-                                        </label>
-                                        {{ user_form.first_name|add_class:"form-control" }}
-                                        {% if user_form.first_name.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in user_form.first_name.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        {% if user_form.first_name.help_text %}
-                                            <div class="form-text">{{ user_form.first_name.help_text }}</div>
-                                        {% endif %}
+                                    <!-- Note about user data -->
+                                    <div class="alert alert-warning alert-sm">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <small>Benutzerdaten werden separat verwaltet und können hier nicht bearbeitet werden.</small>
                                     </div>
 
-                                    <!-- Last Name Field -->
+                                    <!-- Display current user info (read-only) -->
                                     <div class="mb-3">
-                                        <label for="{{ user_form.last_name.id_for_label }}" class="form-label">
-                                            {{ user_form.last_name.label }}
-                                            {% if user_form.last_name.field.required %}<span class="text-danger">*</span>{% endif %}
-                                        </label>
-                                        {{ user_form.last_name|add_class:"form-control" }}
-                                        {% if user_form.last_name.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in user_form.last_name.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        {% if user_form.last_name.help_text %}
-                                            <div class="form-text">{{ user_form.last_name.help_text }}</div>
-                                        {% endif %}
+                                        <label class="form-label">Vorname</label>
+                                        <input type="text" class="form-control" value="{{ client.user.first_name }}" readonly>
                                     </div>
 
-                                    <!-- Email Field -->
                                     <div class="mb-3">
-                                        <label for="{{ user_form.email.id_for_label }}" class="form-label">
-                                            {{ user_form.email.label }}
-                                            {% if user_form.email.field.required %}<span class="text-danger">*</span>{% endif %}
-                                        </label>
-                                        {{ user_form.email|add_class:"form-control" }}
-                                        {% if user_form.email.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in user_form.email.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                        {% if user_form.email.help_text %}
-                                            <div class="form-text">{{ user_form.email.help_text }}</div>
-                                        {% endif %}
+                                        <label class="form-label">Nachname</label>
+                                        <input type="text" class="form-control" value="{{ client.user.last_name }}" readonly>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">E-Mail</label>
+                                        <input type="email" class="form-control" value="{{ client.user.email }}" readonly>
                                     </div>
                                 </fieldset>
                             </div>
 
-                            <!-- Right Column - Client Form -->
+                            <!-- Client Details Column (Editable) -->
                             <div class="col-md-7 ps-md-4">
                                 <fieldset>
-                                    <legend class="fs-5 mb-3 text-primary">
-                                        <i class="bi bi-person-badge me-2"></i>Kundendetails
+                                    <legend class="fs-5 mb-3 text-warning">
+                                        <i class="bi bi-person-badge me-2"></i>Kundendetails (Bearbeitbar)
                                     </legend>
 
-                                    <!-- Non-field errors (form-level errors) -->
+                                    <!-- Form errors summary -->
                                     {% if client_form.non_field_errors %}
                                         <div class="alert alert-danger" role="alert">
                                             {% for error in client_form.non_field_errors %}
@@ -96,29 +89,6 @@
                                             {% endfor %}
                                         </div>
                                     {% endif %}
-
-                                    <!-- Identity Number Field with Info Box -->
-                                    <div class="mb-3">
-                                        <label for="{{ client_form.identity_number.id_for_label }}" class="form-label">
-                                            {{ client_form.identity_number.label }}
-                                            <span class="text-danger">*</span>
-                                        </label>
-                                        {{ client_form.identity_number|add_class:"form-control" }}
-                                        
-                                        <!-- Info box -->
-                                        <div class="alert alert-info mt-2 py-2" role="alert">
-                                            <i class="bi bi-info-circle me-2"></i>
-                                            <small><strong>Hinweis:</strong> Das Anfangspasswort wird die Identitätsnummer des Benutzers sein.</small>
-                                        </div>
-                                        
-                                        {% if client_form.identity_number.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in client_form.identity_number.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
 
                                     <!-- Age Field -->
                                     <div class="mb-3">
@@ -136,7 +106,7 @@
                                         {% endif %}
                                     </div>
 
-                                    <!-- Sex/Gender Field -->
+                                    <!-- Sex Field -->
                                     <div class="mb-3">
                                         <label for="{{ client_form.sex.id_for_label }}" class="form-label">
                                             {{ client_form.sex.label }}
@@ -266,39 +236,12 @@
                             </div>
                         </div>
 
-                        <!-- Form-wide validation summary -->
-                        {% if client_form.errors or user_form.errors %}
-                            <div class="alert alert-warning mt-3" role="alert">
-                                <h6 class="alert-heading">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>Bitte korrigieren Sie die folgenden Fehler:
-                                </h6>
-                                <ul class="mb-0">
-                                    {% for field_name, errors in client_form.errors.items %}
-                                        {% if field_name != '__all__' %}
-                                            <li>
-                                                <strong>{{ field_name }}:</strong>
-                                                {% for error in errors %}{{ error }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                                            </li>
-                                        {% endif %}
-                                    {% endfor %}
-                                    {% for field_name, errors in user_form.errors.items %}
-                                        {% if field_name != '__all__' %}
-                                            <li>
-                                                <strong>{{ field_name }}:</strong>
-                                                {% for error in errors %}{{ error }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                                            </li>
-                                        {% endif %}
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endif %}
-
-                        <!-- Submit Buttons -->
+                        <!-- Action Buttons -->
                         <div class="d-flex justify-content-end mt-4">
-                            <button type="submit" class="btn btn-success me-2">
-                                <i class="bi bi-save me-1"></i>Speichern
+                            <button type="submit" class="btn btn-warning me-2">
+                                <i class="bi bi-check-circle me-1"></i>Änderungen speichern
                             </button>
-                            <a href="{% url 'manage' %}" class="btn btn-outline-secondary">
+                            <a href="{% url 'edit_customers' %}" class="btn btn-outline-secondary">
                                 <i class="bi bi-x-circle me-1"></i>Abbrechen
                             </a>
                         </div>
@@ -309,6 +252,6 @@
     </div>
 </div>
 
-<!-- Bootstrap Icons (if not already included globally) -->
+<!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 {% endblock %}
