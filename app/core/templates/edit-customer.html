@@ -106,6 +106,25 @@
                                         {% endif %}
                                     </div>
 
+                                    <!-- Phone Number Field -->
+                                    <div class="mb-3">
+                                        <label for="{{ user_form.phone_number.id_for_label }}" class="form-label">
+                                            {{ user_form.phone_number.label }}
+                                            {% if user_form.phone_number.field.required %}<span class="text-danger">*</span>{% endif %}
+                                        </label>
+                                        {{ user_form.phone_number|add_class:"form-control" }}
+                                        {% if user_form.phone_number.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in user_form.phone_number.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        {% if user_form.phone_number.help_text %}
+                                            <div class="form-text">{{ user_form.phone_number.help_text }}</div>
+                                        {% endif %}
+                                    </div>
+
                                 </fieldset>
                             </div>
 

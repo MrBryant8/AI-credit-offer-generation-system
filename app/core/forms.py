@@ -15,7 +15,7 @@ class UserLoginForm(forms.Form):
 class UserManageForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name']
+        fields = ['email', 'first_name', 'last_name', 'phone_number']
 
 class AddClientForm(forms.ModelForm):
     class Meta:

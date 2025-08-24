@@ -128,3 +128,7 @@ def save_messages(chat_id, messages_list):
 def prepare_chat_list(user_id):
     all_chats = Chat.objects.filter(user_id=user_id).order_by('id')
     return all_chats
+
+def get_high_risk_clients(threshold):
+    result = Client.objects.filter(risk_score__lt=threshold).select_related('user').order_by('risk_score')
+    return result

@@ -186,7 +186,13 @@ class ManageView(LoginRequiredMixin, UserPassesTestMixin, View):
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     def get(self, request):
-        return render(request, 'manage.html')
+
+        threshold = getattr(settings, 'RISK_THRESHOLD', 0.25)
+        high_risk_clients = get_high_risk_clients(threshold)
+        context = {
+            'high_risk_clients': high_risk_clients,
+        }
+        return render(request, 'manage.html', context)
 
 
 class ModeratorOffersView(LoginRequiredMixin, UserPassesTestMixin, View):

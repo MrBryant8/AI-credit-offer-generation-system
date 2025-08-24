@@ -144,6 +144,9 @@ EMAIL_HOST_PASSWORD = ''
 # LLM API
 GEMINI_API_KEY=""
 
+# Risky user threshold
+RISK_THRESHOLD = 0.25
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
