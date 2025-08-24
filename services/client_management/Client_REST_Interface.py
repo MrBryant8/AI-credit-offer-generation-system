@@ -60,13 +60,14 @@ class REST:
         headers["Accept"] = "application/json"
 
         response = requests.post(url, json=payload, headers=headers, timeout=60)
-        return response.text
+        return response.json()
     
-    def save_offer(self, client_type_id, loan_type_id, email_content):
+    def save_offer(self, client_type_id, loan_type_id, email_subject, email_content):
         url = f"{self.rest_url}/credit-offers/"
         payload = {
             "client": client_type_id,
             "loan_type": loan_type_id,
+            "email_subject": email_subject,
             "email_content": email_content
         }
         response = requests.post(url, json=payload, headers=self.headers, timeout=60)

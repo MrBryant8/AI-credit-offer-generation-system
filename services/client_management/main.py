@@ -10,7 +10,8 @@ def run_pipeline():
             continue
 
         cm.create_offer(client)
-        break #TODO: remove when not in dev
+        cm.rest.add_risk_score_to_customer(client.get("id"), low_risk_probability)
+
 
 
 run_pipeline()

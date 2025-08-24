@@ -200,7 +200,7 @@ class ModeratorOffersView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def get(self, request):
         deactivate_old_credit_offers()
-        credit_offers = CreditOffer.objects.filter(is_active=True)
+        credit_offers = CreditOffer.objects.filter(is_draft=True)
         return render(request, 'suggested-offers.html', {'credit_offers': credit_offers})
 
 

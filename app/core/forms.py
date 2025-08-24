@@ -34,12 +34,14 @@ class ClientForm(forms.ModelForm):
 class EditOfferEmailForm(forms.ModelForm):
     class Meta:
         model = CreditOffer
-        fields = ['email_content', 'moderator_feedback']
+        fields = ['email_subject', 'email_content', 'moderator_feedback']
         widgets = {
+            'email_subject': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
             'email_content': forms.Textarea(attrs={'rows': 8, 'class': 'form-control'}),
             'moderator_feedback': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
         }
         labels = {
+            'email_subject': 'E-Mail Subject',
             'email_content': 'E-Mail Inhalt',
             'moderator_feedback': 'Moderator Kommentar',
         }

@@ -1,3 +1,4 @@
+import json
 import joblib
 import pandas as pd
 from Client_REST_Interface import REST
@@ -15,7 +16,6 @@ class ClientManager:
         pipeline = joblib.load("ml/output/credit_risk_pipeline.joblib")
         client_df = self.generate_client_dataframe(client)
         low_risk_probability = pipeline.predict_proba(client_df)[0, 1]
-        self.rest.add_risk_score_to_customer(client.get("id"), low_risk_probability)
         return low_risk_probability
 
 
@@ -61,8 +61,8 @@ class ClientManager:
         loan_type_desc = "The perfect loan for small buying and a solid ground for something bigger." if not loan_type else loan_type.get("description")
         loan_type_id = 0 if not loan_type else loan_type.get("id")
         email_json = self.rest.generate_email(client, loan_type_desc, user_name, details_link)
-  
-        offer_saved = self.rest.save_offer(client.get("id"), loan_type_id, email_json)
+        email_dict = json.loads(email_json)
+        offer_saved = self.rest.save_offer(client.get("id"), loan_type_id, email_dict["subject"], email_dict["content"])
 
         if offer_saved:
             print(f"Offer generated for {user_name}")
@@ -82,7 +82,7 @@ class ClientManager:
     @staticmethod
     def determine_loan_type(loan_types, amount):
         for loan in loan_types:
-            if loan.get("amount_start") < amount < loan.get("amount_end"):
+            if loan.get("amount_start") <= amount < loan.get("amount_end"):
                 return loan
             
     def get_user_name_from_client(self, client_user_id):

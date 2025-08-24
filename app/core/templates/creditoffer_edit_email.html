@@ -6,29 +6,45 @@
 
   <form method="post">
     {% csrf_token %}
-    <div class="mb-3">
-      {{ form.email_content.label_tag }}
-      {{ form.email_content }}
-      {% if form.email_content.errors %}
-        <div class="text-danger">{{ form.email_content.errors }}</div>
-      {% endif %}
+    
+    <div class="mb-3 position-relative">
+        <label for="{{ form.email_subject.id_for_label }}" class="form-label">
+            {{ form.email_subject.label }}
+            <span tabindex="0" class="text-muted ms-1" data-bs-toggle="tooltip" data-bs-placement="right" title="Der Betreff der E-Mail, die an den Kunden gesendet wird.">
+                <i class="bi bi-question-circle"></i>
+            </span>
+        </label>
+        {{ form.email_subject }}
+        {% if form.email_subject.errors %}
+            <div class="text-danger">{{ form.email_subject.errors }}</div>
+        {% endif %}
     </div>
 
+    <div class="mb-3">
+        {{ form.email_content.label_tag }}
+        {{ form.email_content }}
+        {% if form.email_content.errors %}
+            <div class="text-danger">{{ form.email_content.errors }}</div>
+        {% endif %}
+    </div>
+
+    <!-- Moderator Feedback Field -->
     <div class="mb-3 position-relative">
-      <label for="{{ form.moderator_feedback.id_for_label }}" class="form-label">
-        {{ form.moderator_feedback.label }}
-        <span tabindex="0" class="text-muted ms-1" data-bs-toggle="tooltip" data-bs-placement="right" title="Hier können Moderatoren ihre Anmerkungen zum Angebot eintragen.">
-          <i class="bi bi-question-circle"></i>
-        </span>
-      </label>
-      {{ form.moderator_feedback }}
-      {% if form.moderator_feedback.errors %}
-        <div class="text-danger">{{ form.moderator_feedback.errors }}</div>
-      {% endif %}
+        <label for="{{ form.moderator_feedback.id_for_label }}" class="form-label">
+            {{ form.moderator_feedback.label }}
+            <span tabindex="0" class="text-muted ms-1" data-bs-toggle="tooltip" data-bs-placement="right" title="Hier können Moderatoren ihre Anmerkungen zum Angebot eintragen.">
+                <i class="bi bi-question-circle"></i>
+            </span>
+        </label>
+        {{ form.moderator_feedback }}
+        {% if form.moderator_feedback.errors %}
+            <div class="text-danger">{{ form.moderator_feedback.errors }}</div>
+        {% endif %}
     </div>
 
     <button type="submit" class="btn btn-primary">Speichern</button>
     <a href="{% url 'offer_detail' object.id %}" class="btn btn-secondary ms-2">Abbrechen</a>
-  </form>
+</form>
+
 </div>
 {% endblock %}

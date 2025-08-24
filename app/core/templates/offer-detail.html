@@ -58,8 +58,8 @@
             <dd class="col-sm-7">{{ offer.created_at|date:"d.m.Y" }}</dd>
 
             {% if user.is_authenticated and user.is_moderator %}
-            <dt class="col-sm-5">Moderator Kommentar</dt>
-            <dd class="col-sm-7">{{ offer.moderator_feedback|linebreaksbr }}</dd>
+            <dt class="col-sm-5">Email Subject</dt>
+            <dd class="col-sm-7">{{ offer.email_subject }}</dd>
             {% endif %}
 
             {% if user.is_authenticated and user.is_moderator %}
@@ -67,6 +67,11 @@
             <dd class="col-sm-7">
               <pre class="bg-light p-2 rounded text-break mb-0" style="white-space: pre-wrap;">{{ offer.email_content }}</pre>
             </dd>
+            {% endif %}
+            
+            {% if user.is_authenticated and user.is_moderator %}
+            <dt class="col-sm-5">Moderator Kommentar</dt>
+            <dd class="col-sm-7">{{ offer.moderator_feedback|linebreaksbr }}</dd>
             {% endif %}
 
             <dt class="col-sm-5">Aktiv?</dt>
