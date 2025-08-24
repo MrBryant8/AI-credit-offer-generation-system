@@ -2,8 +2,10 @@ import markdown
 from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages as msg
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.messages import get_messages
+from django.contrib.auth.views import  PasswordChangeView
+from django.core.mail import send_mail
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
@@ -26,6 +28,29 @@ class LandingPageView(View):
 class HomePageView(View):
     def get(self, request):
         return render(request, 'home.html')
+
+class CustomPasswordChangeView(PasswordChangeView):
+    form_class = CustomPasswordChangeForm
+    template_name = 'registration/password_change_form.html'
+    success_url = reverse_lazy('home')
+
+    def form_valid(self, form):
+        user = form.save()
+        
+        # Send confirmation email
+        send_mail(
+            'SmartCredit - Passwort geändert',
+            f'Hallo {user.get_full_name()},\n\nIhr Passwort wurde erfolgreich geändert.\n\nBest regards, Smart Credit Team',
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+        
+        # Keep user logged in
+        update_session_auth_hash(self.request, user)
+        msg.success(self.request, 'Ihr Passwort wurde erfolgreich geändert!')
+        
+        return super().form_valid(form)
 
 @csrf_exempt
 def write_email(request):
@@ -259,7 +284,7 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         try:
             # Send simple email using the content from email_content field
-            from django.core.mail import send_mail, EmailMultiAlternatives
+            from django.core.mail import EmailMultiAlternatives
             email_content_redacted = self.redact_email_content(offer.email_content)
              # Create multipart email
             email = EmailMultiAlternatives(

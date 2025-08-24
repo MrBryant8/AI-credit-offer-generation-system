@@ -1,4 +1,5 @@
 from django.urls import path, include
+from django.views.generic import TemplateView
 from rest_framework.routers import DefaultRouter
 from .views import *
 
@@ -16,6 +17,7 @@ urlpatterns = [
     path("logout/", logout_view, name="logout"),
     path("sign-up/", SignUpPageView.as_view(), name="signup"),
     path("home/", HomePageView.as_view(), name="home"),
+    path("change-password/", CustomPasswordChangeView.as_view(), name="password_change"),
     path("my-offers/", MyOffersView.as_view(), name="my_offers"),
     path('offers/<int:pk>/', CreditOfferDetailView.as_view(), name='offer_detail'),
     path('offer/<int:pk>/accept/', AcceptOfferView.as_view(), name='accept_offer'),

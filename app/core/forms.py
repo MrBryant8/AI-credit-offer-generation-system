@@ -1,5 +1,6 @@
 from django import forms
 from .models import CreditOffer, Client, User
+from django.contrib.auth.forms import PasswordChangeForm
 
 class UserRegisterForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
@@ -65,4 +66,40 @@ class EditOfferEmailForm(forms.ModelForm):
             'email_content': 'E-Mail Inhalt',
             'moderator_feedback': 'Moderator Kommentar',
         }
+
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Customize old password field
+        self.fields['old_password'].widget = forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Aktuelles Passwort eingeben',
+        })
+        self.fields['old_password'].label = 'Aktuelles Passwort'
+        
+        # Customize new password field
+        self.fields['new_password1'].widget = forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Neues Passwort eingeben',
+        })
+        self.fields['new_password1'].label = 'Neues Passwort'
+        
+        # Customize password confirmation field
+        self.fields['new_password2'].widget = forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Neues Passwort bestätigen',
+        })
+        self.fields['new_password2'].label = 'Passwort bestätigen'
+        
+        # Add help text in German
+        self.fields['new_password1'].help_text = '''
+        <ul class="small text-muted mt-1">
+            <li>Mindestens 8 Zeichen lang</li>
+            <li>Nicht nur aus Zahlen bestehen</li>
+            <li>Nicht zu ähnlich zu Ihren persönlichen Daten</li>
+            <li>Nicht zu häufig verwendet werden</li>
+        </ul>
+        '''
 
