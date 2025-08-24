@@ -7,12 +7,11 @@
 
       {% if last_message %}
         <div class="alert 
-            {% if last_message.tags %} alert-{{ last_message.tags }} {% else %} alert-info {% endif %} alert-dismissible fade show" role="alert">
+           {% if last_message.tags %} alert-{{ last_message.tags }} {% else %} alert-info {% endif %} alert-dismissible fade show" role="alert">
           {{ last_message }}
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       {% endif %}
-
 
       {% if offer.client.id == user.id or user.is_moderator %}
       <div class="card shadow-sm">
@@ -59,8 +58,8 @@
             <dd class="col-sm-7">{{ offer.created_at|date:"d.m.Y" }}</dd>
 
             {% if user.is_authenticated and user.is_moderator %}
-            <dt class="col-sm-5">Moderator Kommentar</dt>
-            <dd class="col-sm-7">{{ offer.moderator_feedback|linebreaksbr }}</dd>
+            <dt class="col-sm-5">Email Subject</dt>
+            <dd class="col-sm-7">{{ offer.email_subject }}</dd>
             {% endif %}
 
             {% if user.is_authenticated and user.is_moderator %}
@@ -68,6 +67,11 @@
             <dd class="col-sm-7">
               <pre class="bg-light p-2 rounded text-break mb-0" style="white-space: pre-wrap;">{{ offer.email_content }}</pre>
             </dd>
+            {% endif %}
+            
+            {% if user.is_authenticated and user.is_moderator %}
+            <dt class="col-sm-5">Moderator Kommentar</dt>
+            <dd class="col-sm-7">{{ offer.moderator_feedback|linebreaksbr }}</dd>
             {% endif %}
 
             <dt class="col-sm-5">Aktiv?</dt>
@@ -120,6 +124,34 @@
     </div>
   </div>
 </div>
+
+{% if user.is_authenticated and not user.is_moderator %}
+  <!-- Floating Explain Offer Button -->
+  <a href="{% url 'chat_page' offer.id %}" 
+     class="btn btn-info shadow-lg rounded-circle d-flex align-items-center justify-content-center"
+     id="explain-offer-btn"
+     title="Explain offer">
+    <i class="bi bi-chat-left-text fs-4"></i>
+  </a>
+
+  <style>
+    #explain-offer-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 56px;
+      height: 56px;
+      z-index: 1050;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      transition: background-color 0.3s ease;
+    }
+    #explain-offer-btn:hover {
+      background-color: #198754; /* slightly different green for hover */
+      color: #fff;
+      text-decoration: none;
+    }
+  </style>
+{% endif %}
 
 <!-- Bootstrap Icons CDN (if not included already) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">

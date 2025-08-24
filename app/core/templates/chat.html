@@ -1,0 +1,215 @@
+{% extends 'index.html' %}
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+         <!-- Chat List Sidebar -->
+        <div class="col-md-3 mb-4 mb-md-0">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-light text-dark">
+                    <h6 class="mb-0">
+                        <i class="bi bi-chat-left-dots"></i> Chats
+                    </h6>
+                </div>
+                <ul class="list-group list-group-flush" id="chat-list">
+                    {% for chat_item in chat_list %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center {% if chat_item.id|stringformat:'s' == chat_id|stringformat:'s' %}active{% endif %}">
+                            <div class="flex-grow-1 chat-selector" data-chat-id="{{ chat_item.id }}" style="cursor:pointer;">
+                                Chat #{{ forloop.counter }}
+                                <span class="badge bg-primary rounded-pill">{{ chat_item.num_messages }}</span>
+                            </div>
+                            <!-- Delete button -->
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger ms-2 delete-chat-btn"
+                                    data-chat-id="{{ chat_item.id }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Keine Chats</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm" id="chat-card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-robot me-2"></i>
+                        KI-Chat Assistent - Creditoffer #{{ offer.id }}
+                    </h4>
+                    <p>{{ offer.loan_type.description }}</p>
+                </div>
+                <div class="card-body" style="height: 32rem; overflow-y: auto;" id="chat-log">
+                    {% for message in messages %}
+                        {% if message.role != 'system' %}
+                            <div class="mb-3 d-flex {% if message.role == 'user' %}justify-content-end{% else %}justify-content-start{% endif %}">
+                                <div class="p-2 rounded {% if message.role == 'user' %}bg-primary text-white{% else %}bg-light text-dark border{% endif %}">
+                                    {% if message.role == 'assistant' %}
+                                        <i class="bi bi-robot me-1"></i>
+                                    {% endif %}
+                                    {{ message.content|safe }}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="text-center text-muted mt-5">
+                            <i class="bi bi-chat-dots fs-2"></i>
+                            <div>Frag mich alles – der Chat ist noch leer.</div>
+                        </div>
+                    {% endfor %}
+                </div>
+               <div class="card-footer bg-light">
+                    <!-- Row 1: Chat form (input + send) -->
+                    <form id="chat-form" method="post" class="d-flex mb-2" autocomplete="off">
+                        {% csrf_token %}
+                        <input type="text" id="chat-input" name="message"
+                               class="form-control me-2"
+                               placeholder="Ihre Nachricht..."
+                               autocomplete="off"
+                               autofocus required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Send
+                        </button>
+                    </form>
+
+                    <!-- Row 2: Save & Reset buttons -->
+                    <div class="d-flex gap-2">
+                        <button id="reset-save-btn" class="btn btn-secondary flex-fill" type="button">
+                            <i class="bi bi-floppy me-1"></i>
+                            Save
+                        </button>
+                        <button id="reset-btn" class="btn btn-outline-danger flex-fill" type="button">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<!-- JS for Loading Spinner -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("chat-input");
+    const chatLog = document.getElementById("chat-log");
+    const resetSaveBtn = document.getElementById("reset-save-btn");
+    const resetBtn = document.getElementById("reset-btn");
+
+    form.addEventListener("submit", function (e) {
+        // If you don't want full page reload, remove the comment from e.preventDefault()
+        // e.preventDefault();
+        const messageText = input.value.trim();
+
+        // 1. Append user's message instantly
+        const userBubble = `
+            <div class="mb-3 d-flex justify-content-end">
+                <div class="p-2 rounded bg-primary text-white">
+                    ${messageText}
+                </div>
+            </div>
+        `;
+        chatLog.insertAdjacentHTML("beforeend", userBubble);
+
+        // 2. Append assistant 'loading' bubble
+        const loadingBubble = `
+            <div id="loading-bubble" class="mb-3 d-flex justify-content-start">
+                <div class="p-2 rounded bg-light text-dark border">
+                    <i class="bi bi-robot me-1"></i>
+                    <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        chatLog.insertAdjacentHTML("beforeend", loadingBubble);
+
+        // Auto scroll
+        chatLog.scrollTop = chatLog.scrollHeight;
+    });
+    resetSaveBtn.addEventListener("click", function () {
+        if (!confirm("Chatverlauf speichern und zurücksetzen?")) return;
+
+        fetch("{% url 'save_and_reset_chat' offer.id %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: JSON.stringify({
+                chat_id: "{{ chat_id }}",
+                message_history: "{{ messages }}",
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                }
+            })
+
+    });
+
+    resetBtn.addEventListener("click", function () {
+        if (!confirm("Zurücksetzen?")) return;
+
+        fetch("{% url 'reset_chat' offer.id %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: JSON.stringify({
+                chat_id: "{{ chat_id }}",
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                }
+            })
+
+    });
+
+    document.querySelectorAll('.chat-selector').forEach(function(item) {
+        item.addEventListener('click', function() {
+            const clickedChatId = this.getAttribute('data-chat-id');
+            if (clickedChatId === "{{ chat_id }}") return;
+
+            // Redirect to the chat page of the clicked chat
+            window.location.href = `{% url 'chat_page' offer.id %}?chat_id=${clickedChatId}`;
+            // Adjust the URL pattern as per your Django urls.py, e.g.:
+            // path('chat/<int:offer_id>/<int:chat_id>/', ...)
+        });
+    });
+    document.querySelectorAll(".delete-chat-btn").forEach(btn => {
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation(); // Prevent triggering chat load
+
+            const chatId = this.getAttribute("data-chat-id");
+            if (!confirm("Diesen Chat wirklich löschen?")) return;
+
+            fetch(`/api/chats/${chatId}/`, {
+                method: "DELETE",
+                headers: {
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove from UI
+                    this.closest("li").remove();
+                    window.location.href = "{% url 'chat_page' offer.id %}";
+                }
+            });
+        });
+    });
+});
+</script>
+
+{% endblock %}

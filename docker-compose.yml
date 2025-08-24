@@ -1,26 +1,30 @@
 services:
 
-    react:
-        build:
-            context: ./frontend
-            dockerfile: Dockerfiledev # TODO: Change to Dockerfiledev if you develop
-        container_name: frontend
-        volumes: # Necessary for development purposes
-            - ./frontend:/usr/src/frontend:delegated
-            - /usr/src/frontend/node_modules
-        environment: # Necessary for development purposes
-            - CHOKIDAR_USEPOLLING=true
-            - WATCHPACK_POLLING=true
-        ports:
-            - "3000:80"
-        depends_on:
-            - django
+    # react:
+    #     build:
+    #         context: ./frontend
+    #         dockerfile: Dockerfiledev # TODO: Change to Dockerfiledev if you develop
+    #     container_name: frontend
+    #     volumes: # Necessary for development purposes
+    #         - ./frontend:/usr/src/frontend:delegated
+    #         - /usr/src/frontend/node_modules
+    #     environment: # Necessary for development purposes
+    #         - CHOKIDAR_USEPOLLING=true
+    #         - WATCHPACK_POLLING=true
+    #     ports:
+    #         - "3000:80"
+    #     depends_on:
+    #         - django
 
     django:
         build:
             context: ./app
             dockerfile: Dockerfile
         container_name: django
+        models:
+            llm:
+                endpoint_var: LLM_URL
+                model_var: LLM_NAME
         command: >
             sh -c "
             python manage.py makemigrations &&
@@ -34,6 +38,18 @@ services:
             - "8000:8000"
         depends_on:
             - pgdb
+
+    client_management: 
+        build: 
+            context: ./services/client_management
+            dockerfile: Dockerfile
+        container_name: client_management
+        # profiles: ["manual"]
+        restart: "no"
+        volumes:
+            - ./ml/output:/usr/src/services/client_management/ml/output
+        depends_on:
+            - django
 
     pgdb:
         image: postgres:latest
@@ -57,6 +73,18 @@ services:
             - pgadmin-data:/var/lib/pgadmin/
         depends_on:
             -   pgdb
+
+models:
+    llm:
+        model: ai/gemma3
+        context_size: 4096
+        runtime_flags:
+        - "--verbose"                       # Set verbosity level to infinity
+        - "--verbose-prompt"                # Print a verbose prompt before generation
+        - "--log-prefix"                    # Enable prefix in log messages
+        - "--log-timestamps"                # Enable timestamps in log messages
+        - "--log-colors" 
+        
 
 volumes:
     pgdata:
