@@ -249,7 +249,7 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         
         from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@smartcredit.com')
-        to_email = ["mincho.ta@gmail.com"] # TODO: change to [offer.client.user.email] for real customers
+        to_email = ["mincho.ta@gmail.com", "solo_tan@abv.bg"] # TODO: change to [offer.client.user.email] for real customers
 
         try:
             # Send simple email using the content from email_content field
@@ -280,7 +280,7 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
         return redirect('offer_detail', pk=pk)
     
     @staticmethod
-    def redact_email_content(email_content:str):
+    def redact_email_content(email_content: str):
         """
         Convert email_content markdown to HTML
         """
@@ -289,7 +289,8 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
         
         import html
         import re
-         # First, find all blocks containing lines starting with "* "
+        
+        # First, find all blocks containing lines starting with "* "
         def block_replacer(match):
             block = match.group(0)
             # Replace each bullet line with HTML <li>
@@ -297,19 +298,45 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
             lis = ''.join(f'<li>{item}</li>' for item in items)
             return f'<ul>{lis}</ul>'
 
-        # Escape HTML characters
         escaped_text = html.escape(email_content)
         
-        # Convert **bold** to <strong>
+        # Step 1: Convert markdown links [text](url) to HTML links
+        escaped_text = re.sub(
+            r'\[([^\]]+)\]\((https?://[^\)]+)\)', 
+            r'<a href="\2">\1</a>', 
+            escaped_text
+        )
+        
+        # Step 2: Convert plain URLs to clickable links
+        # Match URLs that are not already in <a> tags
+        escaped_text = re.sub(
+            r'(?<!href=")(?<!href=\')\b(https?://[^\s<>"\']+)',
+            r'<a href="\1">\1</a>',
+            escaped_text
+        )
+        
+        # Step 3: Convert **bold** to <strong>
         escaped_text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', escaped_text)
 
+        # Step 4: Convert bullet lists
         escaped_text = re.sub(r'(?:^\* .+\n?)+', block_replacer, escaped_text, flags=re.MULTILINE)
-        # Convert line breaks to <br>
+        
+        # Step 5: Convert numbered lists (1. 2. 3. etc.)
+        def numbered_block_replacer(match):
+            block = match.group(0)
+            # Replace each numbered line with HTML <li>
+            items = re.findall(r'^\d+\.\s+(.+)', block, re.MULTILINE)
+            lis = ''.join(f'<li>{item}</li>' for item in items)
+            return f'<ol>{lis}</ol>'
+        
+        escaped_text = re.sub(r'(?:^\d+\.\s+.+\n?)+', numbered_block_replacer, escaped_text, flags=re.MULTILINE)
+        
+        # Step 6: Convert line breaks to <br>
         escaped_text = escaped_text.replace('\n', '<br>')
         
         return escaped_text
-    
 
+    
 class AddCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
     login_url = "/login"
     template_name = 'add-customer.html'

@@ -12,22 +12,22 @@ credit_approval_email_task:
     As next steps, make sure to prompt the user to accept the offer, if they like it, and book a consulting hour with a specialist at {bank_address} through {bank_phone_number}.
     Make sure to end the email with a formal regard from SmartCredit. You can use emojis if the demographic situation of the customer finds it suitable..
   expected_output: >
-    A draft email that should follow the specified structure and formatting guidelines.
+    A draft email that should follow the specified structure and formatting guidelines. The email should be in Markdown format.
   agent: email_assistant
 
 email_qa_task:
   description: >
     "Review the response drafted by the Senior Email Specialist. 
     Ensure that the email is comprehensive, accurate, and adheres to the high-quality standards expected for a credit company. 
-    Verify that all parts of the email have been addressed thoroughly, with a helpful and friendly tone. Verify that the email ends with a formal regard from SmartCredit."
+    Verify that all parts of the email have been addressed thoroughly, with a helpful and friendly tone. Verify that the email ends with a formal regard from SmartCredit such as Kind regards, SmartCredit or anything similar."
   expected_output: >
    "A final, detailed, and informative email about the credit offer ready to be sent to the customer.
     Don't be too formal, we are a chill and cool company but maintain a professional and friendly tone throughout.
     IMPORTANT: Always return your response as a valid JSON object with the following structure:
     {
         "subject": "email subject line",
-        "email_text": "plain text email body",
+        "email_text": "markdown email body",
     }
-    
-    Do not include any text before or after the JSON object. In the 'email_text' value do not allow **, just plain text and Emojis if the user is young enough.
+
+    Do not include any text before or after the JSON object.
   agent: email_qa_agent

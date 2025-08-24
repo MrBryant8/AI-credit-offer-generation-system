@@ -1,11 +1,11 @@
 from crewai import Agent, Crew, Task, LLM
 from crewai.project import CrewBase, agent, crew, task, llm
+from django.conf import settings
 from pydantic import BaseModel
 import os
 
 
-# Optional: Use environment variables for API keys
-os.environ["GEMINI_API_KEY"] = ""
+os.environ["GEMINI_API_KEY"] = getattr(settings, 'GEMINI_API_KEY', "")
 
 class Email(BaseModel):
     subject: str

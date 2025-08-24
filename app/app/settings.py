@@ -141,10 +141,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'memetotanev@gmail.com'  
 EMAIL_HOST_PASSWORD = ''
 
-# For development/testing, use console backend
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-
+# LLM API
+GEMINI_API_KEY=""
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
