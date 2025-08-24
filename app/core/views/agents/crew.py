@@ -7,6 +7,7 @@ import os
 
 os.environ["GEMINI_API_KEY"] = getattr(settings, 'GEMINI_API_KEY', "")
 
+# TODO update the config file globally/on init at each run.
 class Email(BaseModel):
     subject: str
     content: str

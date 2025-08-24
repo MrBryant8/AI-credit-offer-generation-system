@@ -42,7 +42,8 @@ class CustomPasswordChangeView(PasswordChangeView):
             'SmartCredit - Passwort geändert',
             f'Hallo {user.get_full_name()},\n\nIhr Passwort wurde erfolgreich geändert.\n\nBest regards, Smart Credit Team',
             settings.DEFAULT_FROM_EMAIL,
-            [user.email],
+            ["mincho.ta@gmail.com"], # TODO: update to [user.email], when in prod
+  
             fail_silently=False,
         )
         

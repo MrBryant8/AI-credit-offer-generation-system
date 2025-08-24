@@ -1,20 +1,20 @@
 services:
 
-    # react:
-    #     build:
-    #         context: ./frontend
-    #         dockerfile: Dockerfiledev # TODO: Change to Dockerfiledev if you develop
-    #     container_name: frontend
-    #     volumes: # Necessary for development purposes
-    #         - ./frontend:/usr/src/frontend:delegated
-    #         - /usr/src/frontend/node_modules
-    #     environment: # Necessary for development purposes
-    #         - CHOKIDAR_USEPOLLING=true
-    #         - WATCHPACK_POLLING=true
-    #     ports:
-    #         - "3000:80"
-    #     depends_on:
-    #         - django
+    react:
+        build:
+            context: ./frontend
+            dockerfile: Dockerfiledev # TODO: Change to Dockerfiledev if you develop
+        container_name: frontend
+        volumes: # Necessary for development purposes
+            - ./frontend:/usr/src/frontend:delegated
+            - /usr/src/frontend/node_modules
+        environment: # Necessary for development purposes
+            - CHOKIDAR_USEPOLLING=true
+            - WATCHPACK_POLLING=true
+        ports:
+            - "3000:80"
+        depends_on:
+            - django
 
     django:
         build:
@@ -44,13 +44,13 @@ services:
             context: ./services/client_management
             dockerfile: Dockerfile
         container_name: client_management
-        # profiles: ["manual"]
         restart: "no"
         volumes:
             - ./ml/output:/usr/src/services/client_management/ml/output
         depends_on:
             - django
-
+    
+    #TODO add agent_management container and resolve requirements.txt
     pgdb:
         image: postgres:latest
         container_name: pgdb
