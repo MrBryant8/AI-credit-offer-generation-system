@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
-from ...models import Client, CreditOffer, Loan  # Replace yourapp with your app name
+from ...models import Client, CreditOffer, Loan, AgentConfig
 from django.utils import timezone
 import random
 
@@ -216,3 +216,6 @@ class Command(BaseCommand):
                     f"Offer already exists (User: {od['client'].id}, Loan Type: {od['loan'].description})")
 
         self.stdout.write(self.style.SUCCESS("Database seeding completed!"))
+
+        AgentConfig.objects.create()
+

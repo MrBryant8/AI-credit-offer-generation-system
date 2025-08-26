@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from ..models import Client, CreditOffer, User, Chat, Loan
-from ..serializers import ClientSerializer, CreditOfferSerializer, UserSerializer, ChatSerializer, LoanSerializer
+from ..models import Client, CreditOffer, User, Chat, Loan, AgentConfig
+from ..serializers import ClientSerializer, CreditOfferSerializer, UserSerializer, ChatSerializer, LoanSerializer, AgentConfigSerializer
 
 class ClientViewSet(viewsets.ModelViewSet):
     queryset = Client.objects.all()
@@ -21,3 +21,7 @@ class ChatViewSet(viewsets.ModelViewSet):
 class LoanViewSet(viewsets.ModelViewSet):
     queryset = Loan.objects.all()
     serializer_class = LoanSerializer
+
+class AgentConfigViewSet(viewsets.ModelViewSet):
+    queryset = AgentConfig.objects.all()
+    serializer_class = AgentConfigSerializer
