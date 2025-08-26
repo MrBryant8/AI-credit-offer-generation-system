@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
-from ...models import Client, CreditOffer, Loan, AgentConfig
-from django.utils import timezone
+from ...models import Client, CreditOffer, Loan
 import random
 
 
@@ -217,5 +216,4 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Database seeding completed!"))
 
-        AgentConfig.objects.create()
 

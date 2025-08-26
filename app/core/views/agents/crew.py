@@ -7,7 +7,6 @@ import os
 
 os.environ["GEMINI_API_KEY"] = getattr(settings, 'GEMINI_API_KEY', "")
 
-# TODO update the config file globally/on init at each run.
 class Email(BaseModel):
     subject: str
     content: str
@@ -57,8 +56,8 @@ class EmailCrew():
   def crew(self) -> Crew:
     """Creates the CreditApprovalEmail crew"""
     return Crew(
-      agents=self.agents, # Automatically created by the @agent decorator
-      tasks=self.tasks, # Automatically created by the @task decorator
+      agents=self.agents,
+      tasks=self.tasks,
       verbose=True,
     )
   

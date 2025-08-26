@@ -95,15 +95,17 @@ def rephraze_offer(offer):
         context_lines.append("\nClient Details:")
         context_lines.append(f"- Name: {offer.client.user.first_name} {offer.client.user.last_name}")
         context_lines.append(f"- Age: {offer.client.age}")
-        context_lines.append(f"- Employed: {offer.client.is_employed}")
-        context_lines.append(f"- Salary: {offer.client.salary}")
-        context_lines.append(f"- Current Debt: {offer.client.current_debt}")
-        context_lines.append(f"- Sex: {offer.client.sex or 'N/A'}")
+        context_lines.append(f"- Sex: {offer.client.sex}")
+        context_lines.append(f"- Job Skill Level: {offer.client.job}")
+        context_lines.append(f"- Housing: {offer.client.housing}")
+        context_lines.append(f"- Saving Account Status: {offer.client.saving_account}")
+        context_lines.append(f"- Checking Account Status: {offer.client.checking_account}")
+        context_lines.append(f"- Loan Amount Requested: {offer.client.credit_amount}")
+        context_lines.append(f"- Loan Repayment duration: {offer.client.duration}")
+        context_lines.append(f"- Loan Purpose: {offer.client.purpose}")
         context_lines.append(
-            f"- Risk Score: {offer.client.risk_score if offer.client.risk_score is not None else 'N/A'}")
-        context_lines.append(
-            f"- Propensity Score: {offer.client.propensity_score if offer.client.propensity_score is not None else 'N/A'}")
-
+            f"- Risk Score: {"Approved" if offer.client.risk_score > 0.5 else "Denied"}")
+        
     return "\n".join(context_lines)
 
 

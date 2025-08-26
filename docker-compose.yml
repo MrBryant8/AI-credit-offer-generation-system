@@ -32,6 +32,12 @@ services:
             python manage.py seed_db &&
             python manage.py runserver 0.0.0.0:8000
             "
+        secrets:
+            - gemini_api_key
+            - gmail_user_email
+            - gmail_app_password
+        environment:
+            - RISK_THRESHOLD=0.20
         volumes:
             - ./app:/usr/src/app
         ports:
@@ -45,12 +51,24 @@ services:
             dockerfile: Dockerfile
         container_name: client_management
         restart: "no"
+        environment:
+            - RISK_THRESHOLD=0.20
         volumes:
             - ./ml/output:/usr/src/services/client_management/ml/output
         depends_on:
             - django
+
+    feedback_management: 
+        build: 
+            context: ./services/feedback_management
+            dockerfile: Dockerfile
+        container_name: feedback_management
+        restart: "no"
+        secrets:
+            - gemini_api_key
+        depends_on:
+            - django
     
-    #TODO add agent_management container and resolve requirements.txt
     pgdb:
         image: postgres:latest
         container_name: pgdb
@@ -85,7 +103,16 @@ models:
         - "--log-timestamps"                # Enable timestamps in log messages
         - "--log-colors" 
         
-
 volumes:
     pgdata:
     pgadmin-data:
+
+secrets:
+    gemini_api_key:
+        file: secrets/gemini_api_key.txt
+
+    gmail_user_email:
+        file: secrets/gmail_user_email.txt
+
+    gmail_app_password:
+        file: secrets/gmail_app_password.txt

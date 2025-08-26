@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Client, CreditOffer, User, Chat, Loan, AgentConfig
+from .models import *
 
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,8 +26,8 @@ class LoanSerializer(serializers.ModelSerializer):
         model = Loan
         fields = '__all__'
 
-class AgentConfigSerializer(serializers.ModelSerializer):
+class FeedbackConfigSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AgentConfig
+        model = FeedbackConfig
         fields = '__all__'
 
