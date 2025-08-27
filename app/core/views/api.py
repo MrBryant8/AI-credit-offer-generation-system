@@ -22,6 +22,6 @@ class LoanViewSet(viewsets.ModelViewSet):
     queryset = Loan.objects.all()
     serializer_class = LoanSerializer
 
-class FeedbackConfigViewSet(viewsets.ModelViewSet):
-    queryset = FeedbackConfig.objects.all()
-    serializer_class = FeedbackConfigSerializer
+class AgentFeedbackViewSet(viewsets.ModelViewSet):
+    queryset = AgentFeedback.objects.all()
+    serializer_class = AgentFeedbackSerializer

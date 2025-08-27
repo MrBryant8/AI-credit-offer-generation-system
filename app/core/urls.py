@@ -9,7 +9,7 @@ router.register(r'credit-offers', CreditOfferViewSet)
 router.register(r'users', UserViewSet)
 router.register(r'chats', ChatViewSet)
 router.register(r'loans', LoanViewSet)
-router.register(r'agent-feedbacks', FeedbackConfigViewSet)
+router.register(r'agent-feedbacks', AgentFeedbackViewSet)
 
 
 urlpatterns = [

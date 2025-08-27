@@ -134,10 +134,8 @@ STATICFILES_DIRS = [
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+DEFAULT_EMAIL_RECEIVER = os.environ.get("DEFAULT_EMAIL_RECEIVER", "solo_tan@abv.bg")
+
 with open('/run/secrets/gmail_user_email', 'r') as f:
     EMAIL_HOST_USER = f.read().strip()
 

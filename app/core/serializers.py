@@ -26,8 +26,8 @@ class LoanSerializer(serializers.ModelSerializer):
         model = Loan
         fields = '__all__'
 
-class FeedbackConfigSerializer(serializers.ModelSerializer):
+class AgentFeedbackSerializer(serializers.ModelSerializer):
     class Meta:
-        model = FeedbackConfig
+        model = AgentFeedback
         fields = '__all__'
 

@@ -18,6 +18,9 @@ from ..forms import *
 from ..services.custom_api import *
 from django.core.paginator import Paginator
 from .agents.crew import EmailCrew
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
 class LandingPageView(View):
@@ -36,16 +39,21 @@ class CustomPasswordChangeView(PasswordChangeView):
 
     def form_valid(self, form):
         user = form.save()
+
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@smartcredit.com')
+        user = getattr(settings, 'EMAIL_HOST_USER')
+        password = getattr(settings, 'EMAIL_HOST_PASSWORD')
+        to_email = [getattr(settings, 'DEFAULT_EMAIL_RECEIVER') if user.id < 6 else user.email] # Skip first 5 customers as they are dummy users
         
-        # Send confirmation email
-        send_mail(
-            'SmartCredit - Passwort geändert',
-            f'Hallo {user.get_full_name()},\n\nIhr Passwort wurde erfolgreich geändert.\n\nBest regards, Smart Credit Team',
-            settings.DEFAULT_FROM_EMAIL,
-            ["mincho.ta@gmail.com"], # TODO: update to [user.email], when in prod
-  
-            fail_silently=False,
-        )
+        with smtplib.SMTP("smtp.gmail.com", port=587) as connection:
+            connection.ehlo()
+            connection.starttls()
+            connection.login(user=user, password=password)
+            connection.sendmail(
+                from_addr=from_email,
+                to_addrs=to_email,
+                msg="Subject:SmartCredit - Passwort geändert\n\n" + f'Hallo {user.get_full_name()},\n\nIhr Passwort wurde erfolgreich geändert.\n\nBest regards, Smart Credit Team'
+                )
         
         # Keep user logged in
         update_session_auth_hash(self.request, user)
@@ -262,7 +270,6 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
     login_url = "/login"
 
     def test_func(self):
-        # For example: only moderators can send emails
         return self.request.user.is_moderator
 
     def handle_no_permission(self):
@@ -279,36 +286,36 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
             msg.error(request, "Keine E-Mail-Inhalte für dieses Angebot verfügbar.")
             return redirect('offer_detail', pk=pk)
 
-        
         from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@smartcredit.com')
-        to_email = ["mincho.ta@gmail.com", "solo_tan@abv.bg"] # TODO: change to [offer.client.user.email] for real customers
+        user = getattr(settings, 'EMAIL_HOST_USER')
+        password = getattr(settings, 'EMAIL_HOST_PASSWORD')
+        to_email = [getattr(settings, 'DEFAULT_EMAIL_RECEIVER') if offer.client.user.id < 6 else offer.client.user.email] # Skip first 5 customers as they are dummy users
+        email_content_redacted = self.redact_email_content(offer.email_content)
+        email = MIMEMultipart("alternative")
+        email["Subject"] = offer.email_subject
+        email.attach(MIMEText(email_content_redacted, "html"))
 
         try:
-            # Send simple email using the content from email_content field
-            from django.core.mail import EmailMultiAlternatives
-            email_content_redacted = self.redact_email_content(offer.email_content)
-             # Create multipart email
-            email = EmailMultiAlternatives(
-                subject=offer.email_subject or f"Ihr Kreditangebot #{offer.id}",
-                body=offer.email_content,  # Plain text version
-                from_email=from_email,
-                to=to_email
-            )
-            email.attach_alternative(email_content_redacted, "text/html")
-    
-            email_sent_count = email.send(fail_silently=False)
-            
-            if email_sent_count == 1:
-                offer.is_draft = False
-                offer.is_active = True
-                offer.save()
+            with smtplib.SMTP("smtp.gmail.com", port=587) as connection:
+                connection.ehlo()
+                connection.starttls()
+                connection.login(user=user, password=password)
+                connection.sendmail(
+                    from_addr=from_email,
+                    to_addrs=to_email,
+                    msg=email.as_string()
+                    )
+                
+            offer.is_draft = False
+            offer.is_active = True
+            offer.save()
 
-                msg.success(request, f"E-Mail für Angebot #{offer.id} wurde erfolgreich an {to_email[0]} versandt.")
+            msg.success(request, f"E-Mail für Angebot #{offer.id} wurde erfolgreich versandt.")
 
         except Exception as e:
             print("FAILURE")
             msg.error(request, f"Fehler beim Versenden der E-Mail: {str(e)}")
-
+        
         return redirect('offer_detail', pk=pk)
     
     @staticmethod
@@ -364,7 +371,7 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
         escaped_text = re.sub(r'(?:^\d+\.\s+.+\n?)+', numbered_block_replacer, escaped_text, flags=re.MULTILINE)
         
         # Step 6: Convert line breaks to <br>
-        escaped_text = escaped_text.replace('\n', '<br>')
+        escaped_text = escaped_text.replace('\\n', '<br>')
         
         return escaped_text
 
