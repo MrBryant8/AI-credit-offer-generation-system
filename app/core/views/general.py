@@ -32,6 +32,7 @@ class HomePageView(View):
     def get(self, request):
         return render(request, 'home.html')
 
+# TODO: check this out
 class CustomPasswordChangeView(PasswordChangeView):
     form_class = CustomPasswordChangeForm
     template_name = 'registration/password_change_form.html'
@@ -41,14 +42,14 @@ class CustomPasswordChangeView(PasswordChangeView):
         user = form.save()
 
         from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@smartcredit.com')
-        user = getattr(settings, 'EMAIL_HOST_USER')
+        user_email = getattr(settings, 'EMAIL_HOST_USER')
         password = getattr(settings, 'EMAIL_HOST_PASSWORD')
         to_email = [getattr(settings, 'DEFAULT_EMAIL_RECEIVER') if user.id < 6 else user.email] # Skip first 5 customers as they are dummy users
         
         with smtplib.SMTP("smtp.gmail.com", port=587) as connection:
             connection.ehlo()
             connection.starttls()
-            connection.login(user=user, password=password)
+            connection.login(user=user_email, password=password)
             connection.sendmail(
                 from_addr=from_email,
                 to_addrs=to_email,
@@ -287,7 +288,7 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
             return redirect('offer_detail', pk=pk)
 
         from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@smartcredit.com')
-        user = getattr(settings, 'EMAIL_HOST_USER')
+        user_email = getattr(settings, 'EMAIL_HOST_USER')
         password = getattr(settings, 'EMAIL_HOST_PASSWORD')
         to_email = [getattr(settings, 'DEFAULT_EMAIL_RECEIVER') if offer.client.user.id < 6 else offer.client.user.email] # Skip first 5 customers as they are dummy users
         email_content_redacted = self.redact_email_content(offer.email_content)
@@ -299,7 +300,7 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
             with smtplib.SMTP("smtp.gmail.com", port=587) as connection:
                 connection.ehlo()
                 connection.starttls()
-                connection.login(user=user, password=password)
+                connection.login(user=user_email, password=password)
                 connection.sendmail(
                     from_addr=from_email,
                     to_addrs=to_email,

@@ -3,7 +3,7 @@ services:
     # react:
     #     build:
     #         context: ./frontend
-    #         dockerfile: Dockerfiledev # TODO: Change to Dockerfiledev if you develop
+    #         dockerfile: Dockerfile
     #     container_name: frontend
     #     volumes: # Necessary for development purposes
     #         - ./frontend:/usr/src/frontend:delegated
