@@ -1,5 +1,4 @@
 from django.urls import path, include
-from django.views.generic import TemplateView
 from rest_framework.routers import DefaultRouter
 from .views import *
 
@@ -34,11 +33,11 @@ urlpatterns = [
     path("manage/add-customer", AddCustomerView.as_view(), name="add_customer"),
     path("manage/edit-customers/", EditCustomersView.as_view(), name="edit_customers"),
     path("manage/edit-customer/<int:pk>/", EditCustomerView.as_view(), name="edit_customer"),
+    path("manage/edit-customer/<int:pk>/deactivate/", DeactivateCustomerView.as_view(), name="deactivate_customer"),
     path("manage/view-declined-customers/", DeclinedClientsView.as_view(), name="declined_clients"),
     path("manage/view-agent-feedback/", AgentFeedbackView.as_view(), name="agent_feedback"),
     path("manage/feedback/<int:pk>/decline/", AgentFeedbackDeclineView.as_view(), name="decline_agent_feedback"),
     path("manage/feedback/<int:pk>/report/", AgentFeedbackReportView.as_view(), name="report_agent_feedback"),
-    path("manage/delete-customer/", DeleteCustomerView.as_view(), name="delete_client"),
     path("create-email/", write_email, name="create_email"),
     path('api/', include(router.urls))
 ]

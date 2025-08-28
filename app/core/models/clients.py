@@ -19,14 +19,14 @@ class Client(models.Model):
         FREE = 'free'
 
     class SavingsAccount(models.TextChoices):
-        NA = "unknown"
+        UNKNOWN = "unknown"
         LITTLE = "little"
         MODERATE = "moderate"
         RICH = "rich"
         QUITE_RICH = "quite rich"
 
     class CheckingAccount(models.TextChoices):
-        NA = "unknown"
+        UNKNOWN = "unknown"
         LITTLE = "little"
         MODERATE = "moderate"
         RICH = "rich"
@@ -44,7 +44,7 @@ class Client(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.OneToOneField(
         User,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         blank=True
     )
@@ -59,3 +59,4 @@ class Client(models.Model):
     duration = models.IntegerField(null=False, blank=False, default=12)
     purpose = models.CharField(max_length=100, null=False, choices=Purpose.choices)
     risk_score = models.FloatField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)

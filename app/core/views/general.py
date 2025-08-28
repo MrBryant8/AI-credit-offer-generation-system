@@ -8,6 +8,7 @@ from django.contrib.auth.views import  PasswordChangeView
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.http import require_POST
 from django.views.generic import FormView, DetailView, UpdateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.utils.safestring import mark_safe
@@ -345,7 +346,7 @@ class EditCustomersView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             # Search by identity number
             queryset = queryset.filter(identity_number__icontains=query)
         
-        return queryset.order_by('user__last_name', 'user__first_name')
+        return queryset.order_by('user__last_name', 'user__first_name').exclude(is_active=False)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -413,9 +414,16 @@ class EditCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
             'is_editing': True,
         })
     
-class DeleteCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
-    pass
-    
+class DeactivateCustomerView(View):
+    http_method_names = ["post"]
+
+    def post(self, request, pk, *args, **kwargs):
+        customer = get_object_or_404(Client, pk=pk)
+        customer.is_active = False 
+        customer.save(update_fields=["is_active"])
+        msg.success(request, "Kunde wurde deaktiviert.")
+        return redirect(reverse("edit_customers"))
+
 class DeclinedClientsView(LoginRequiredMixin, UserPassesTestMixin, View):
     login_url = "/login"
 

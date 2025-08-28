@@ -29,6 +29,7 @@ class Command(BaseCommand):
                     "first_name": udata["first_name"],
                     "last_name": udata["last_name"],
                     "is_active": True,
+                    "is_moderator": True if udata["email"] == "bob@smartcredit.com" else False
                 }
             )
             if created:
@@ -129,8 +130,8 @@ class Command(BaseCommand):
         "sex": Client.Sex.FEMALE,
         "job": Client.Job.JOBLESS,
         "housing": Client.Housing.RENT,
-        "saving_account": Client.SavingsAccount.NA,
-        "checking_account": Client.CheckingAccount.NA,
+        "saving_account": Client.SavingsAccount.UNKNOWN,
+        "checking_account": Client.CheckingAccount.UNKNOWN,
         "credit_amount": 400,
         "duration": 6,
         "purpose": Client.Purpose.EDUCATION,
