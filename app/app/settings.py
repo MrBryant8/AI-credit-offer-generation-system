@@ -59,7 +59,7 @@ AUTH_USER_MODEL = "core.User"
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'core/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -134,18 +134,20 @@ STATICFILES_DIRS = [
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'memetotanev@gmail.com'  
-EMAIL_HOST_PASSWORD = ''
+DEFAULT_EMAIL_RECEIVER = os.environ.get("DEFAULT_EMAIL_RECEIVER", "solo_tan@abv.bg")
+
+with open('/run/secrets/gmail_user_email', 'r') as f:
+    EMAIL_HOST_USER = f.read().strip()
+
+with open('/run/secrets/gmail_app_password', 'r') as f:
+    EMAIL_HOST_PASSWORD = f.read().strip()
 
 # LLM API
-GEMINI_API_KEY=""
+with open('/run/secrets/gemini_api_key', 'r') as f:
+    GEMINI_API_KEY=f.read().strip()
 
 # Risky user threshold
-RISK_THRESHOLD = 0.25
+RISK_THRESHOLD = float(os.environ.get("RISK_THRESHOLD", 0.25))
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

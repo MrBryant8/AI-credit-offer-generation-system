@@ -318,10 +318,20 @@
                         {% endif %}
 
                         <!-- Action Buttons -->
-                        <div class="d-flex justify-content-end mt-4">
-                            <button type="submit" class="btn btn-warning me-2">
+                        <div class="d-flex justify-content-end align-items-center mt-4 gap-2">
+                            <!-- Save -->
+                            <button type="submit" class="btn btn-warning">
                                 <i class="bi bi-check-circle me-1"></i>Änderungen speichern
                             </button>
+
+                            <!-- Delete customer (POST) -->
+                            <a href="{% url 'deactivate_customer' client.id %}" 
+                                class="btn btn-danger"
+                                onclick="return deactivateClient(event, this.href);">
+                                <i class="bi bi-person-x me-1"></i>Deaktivieren
+                            </a>
+
+                            <!-- Cancel -->
                             <a href="{% url 'edit_customers' %}" class="btn btn-outline-secondary">
                                 <i class="bi bi-x-circle me-1"></i>Abbrechen
                             </a>
@@ -341,6 +351,35 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 });
+</script>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (const c of cookies) {
+                const cookie = c.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    async function deactivateClient(e, url) {
+        e.preventDefault();
+        if (!confirm('Kunde wirklich deaktivieren?')) return false;
+        const csrftoken = getCookie('csrftoken');
+        if (!csrftoken) { alert('CSRF fehlt. Seite neu laden.'); return false; }
+        const resp = await fetch(url, { method: 'POST', headers: { 'X-CSRFToken': csrftoken } });
+        if (resp.redirected) window.location = resp.url;
+        else if (resp.ok) window.location.reload();
+        else alert('Aktion fehlgeschlagen (HTTP ' + resp.status + ').');
+        return false;
+    }
 </script>
 
 <!-- Bootstrap Icons -->

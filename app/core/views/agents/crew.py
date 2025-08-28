@@ -56,8 +56,8 @@ class EmailCrew():
   def crew(self) -> Crew:
     """Creates the CreditApprovalEmail crew"""
     return Crew(
-      agents=self.agents, # Automatically created by the @agent decorator
-      tasks=self.tasks, # Automatically created by the @task decorator
+      agents=self.agents,
+      tasks=self.tasks,
       verbose=True,
     )
   

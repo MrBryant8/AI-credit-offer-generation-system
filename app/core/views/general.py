@@ -1,14 +1,14 @@
 import markdown
-from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages as msg
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.messages import get_messages
 from django.contrib.auth.views import  PasswordChangeView
-from django.core.mail import send_mail
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.http import require_POST
 from django.views.generic import FormView, DetailView, UpdateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.utils.safestring import mark_safe
@@ -29,22 +29,20 @@ class HomePageView(View):
     def get(self, request):
         return render(request, 'home.html')
 
-class CustomPasswordChangeView(PasswordChangeView):
+
+class CustomPasswordChangeView(PasswordChangeView, LoginRequiredMixin):
     form_class = CustomPasswordChangeForm
     template_name = 'registration/password_change_form.html'
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
         user = form.save()
-        
-        # Send confirmation email
-        send_mail(
-            'SmartCredit - Passwort geändert',
-            f'Hallo {user.get_full_name()},\n\nIhr Passwort wurde erfolgreich geändert.\n\nBest regards, Smart Credit Team',
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
-        )
+
+        to_email = [getattr(settings, 'DEFAULT_EMAIL_RECEIVER') if user.id < 6 else user.email] # Skip first 5 customers as they are dummy users
+        subject = "SmartCredit - Passwort geändert"
+        body = f"Hallo {user.get_full_name()},\n\nIhr Passwort wurde erfolgreich geändert.\n\nBest regards, Smart Credit Team"
+
+        send_email(to_email, subject, body)
         
         # Keep user logged in
         update_session_auth_hash(self.request, user)
@@ -211,13 +209,7 @@ class ManageView(LoginRequiredMixin, UserPassesTestMixin, View):
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     def get(self, request):
-
-        threshold = getattr(settings, 'RISK_THRESHOLD', 0.25)
-        high_risk_clients = get_high_risk_clients(threshold)
-        context = {
-            'high_risk_clients': high_risk_clients,
-        }
-        return render(request, 'manage.html', context)
+        return render(request, 'manage.html')
 
 
 class ModeratorOffersView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -261,7 +253,6 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
     login_url = "/login"
 
     def test_func(self):
-        # For example: only moderators can send emails
         return self.request.user.is_moderator
 
     def handle_no_permission(self):
@@ -277,95 +268,25 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
         if not offer.email_content:
             msg.error(request, "Keine E-Mail-Inhalte für dieses Angebot verfügbar.")
             return redirect('offer_detail', pk=pk)
-
-        
-        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@smartcredit.com')
-        to_email = ["mincho.ta@gmail.com", "solo_tan@abv.bg"] # TODO: change to [offer.client.user.email] for real customers
+ 
+        to_email = [getattr(settings, 'DEFAULT_EMAIL_RECEIVER') if offer.client.user.id < 6 else offer.client.user.email] # Skip first 5 customers as they are dummy users
+        email_content_redacted = redact_email_content(offer.email_content)
 
         try:
-            # Send simple email using the content from email_content field
-            from django.core.mail import EmailMultiAlternatives
-            email_content_redacted = self.redact_email_content(offer.email_content)
-             # Create multipart email
-            email = EmailMultiAlternatives(
-                subject=offer.email_subject or f"Ihr Kreditangebot #{offer.id}",
-                body=offer.email_content,  # Plain text version
-                from_email=from_email,
-                to=to_email
-            )
-            email.attach_alternative(email_content_redacted, "text/html")
-    
-            email_sent_count = email.send(fail_silently=False)
-            
-            if email_sent_count == 1:
-                offer.is_draft = False
-                offer.is_active = True
-                offer.save()
+            send_email(to_email, offer.email_subject, email_content_redacted, format="html")
+                
+            offer.is_draft = False
+            offer.is_active = True
+            offer.save()
 
-                msg.success(request, f"E-Mail für Angebot #{offer.id} wurde erfolgreich an {to_email[0]} versandt.")
+            msg.success(request, f"E-Mail für Angebot #{offer.id} wurde erfolgreich versandt.")
 
         except Exception as e:
             print("FAILURE")
             msg.error(request, f"Fehler beim Versenden der E-Mail: {str(e)}")
-
+        
         return redirect('offer_detail', pk=pk)
     
-    @staticmethod
-    def redact_email_content(email_content: str):
-        """
-        Convert email_content markdown to HTML
-        """
-        if not email_content:
-            return ""
-        
-        import html
-        import re
-        
-        # First, find all blocks containing lines starting with "* "
-        def block_replacer(match):
-            block = match.group(0)
-            # Replace each bullet line with HTML <li>
-            items = re.findall(r'^\* (.+)', block, re.MULTILINE)
-            lis = ''.join(f'<li>{item}</li>' for item in items)
-            return f'<ul>{lis}</ul>'
-
-        escaped_text = html.escape(email_content)
-        
-        # Step 1: Convert markdown links [text](url) to HTML links
-        escaped_text = re.sub(
-            r'\[([^\]]+)\]\((https?://[^\)]+)\)', 
-            r'<a href="\2">\1</a>', 
-            escaped_text
-        )
-        
-        # Step 2: Convert plain URLs to clickable links
-        # Match URLs that are not already in <a> tags
-        escaped_text = re.sub(
-            r'(?<!href=")(?<!href=\')\b(https?://[^\s<>"\']+)',
-            r'<a href="\1">\1</a>',
-            escaped_text
-        )
-        
-        # Step 3: Convert **bold** to <strong>
-        escaped_text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', escaped_text)
-
-        # Step 4: Convert bullet lists
-        escaped_text = re.sub(r'(?:^\* .+\n?)+', block_replacer, escaped_text, flags=re.MULTILINE)
-        
-        # Step 5: Convert numbered lists (1. 2. 3. etc.)
-        def numbered_block_replacer(match):
-            block = match.group(0)
-            # Replace each numbered line with HTML <li>
-            items = re.findall(r'^\d+\.\s+(.+)', block, re.MULTILINE)
-            lis = ''.join(f'<li>{item}</li>' for item in items)
-            return f'<ol>{lis}</ol>'
-        
-        escaped_text = re.sub(r'(?:^\d+\.\s+.+\n?)+', numbered_block_replacer, escaped_text, flags=re.MULTILINE)
-        
-        # Step 6: Convert line breaks to <br>
-        escaped_text = escaped_text.replace('\n', '<br>')
-        
-        return escaped_text
 
     
 class AddCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -425,7 +346,7 @@ class EditCustomersView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             # Search by identity number
             queryset = queryset.filter(identity_number__icontains=query)
         
-        return queryset.order_by('user__last_name', 'user__first_name')
+        return queryset.order_by('user__last_name', 'user__first_name').exclude(is_active=False)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -492,7 +413,88 @@ class EditCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
             'client': client,
             'is_editing': True,
         })
+    
+class DeactivateCustomerView(View):
+    http_method_names = ["post"]
 
+    def post(self, request, pk, *args, **kwargs):
+        customer = get_object_or_404(Client, pk=pk)
+        customer.is_active = False 
+        customer.save(update_fields=["is_active"])
+        msg.success(request, "Kunde wurde deaktiviert.")
+        return redirect(reverse("edit_customers"))
+
+class DeclinedClientsView(LoginRequiredMixin, UserPassesTestMixin, View):
+    login_url = "/login"
+
+    def test_func(self):
+        return self.request.user.is_moderator
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("Sie haben keine Berechtigung, diesen Kunden zu bearbeiten.")
+        return super().handle_no_permission()
+    
+    def get(self, request):
+        threshold = getattr(settings, 'RISK_THRESHOLD', 0.25)
+        high_risk_clients = get_high_risk_clients(threshold)
+        context = {
+            'high_risk_clients': high_risk_clients,
+        }
+
+        return render(request, "high-risk-clients.html", context)
+
+
+class AgentFeedbackView(LoginRequiredMixin, UserPassesTestMixin, View):
+    login_url = "/login"
+
+    def test_func(self):
+        return self.request.user.is_moderator
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("Sie haben keine Berechtigung, diesen Kunden zu bearbeiten.")
+        return super().handle_no_permission()
+    
+    def get(self, request):
+        
+        agent_feedback_object = get_agent_feedback()
+        if agent_feedback_object:
+            agent_feedback_object.feedback = redact_email_content(agent_feedback_object.feedback.split(":", 1)[-1])
+            context = {
+                "agent_feedback": agent_feedback_object,
+            }
+        else:
+            context = {
+                "agent_feedback": {
+                    "feedback": None
+                }
+            }
+        return render(request, "agent-feedback.html", context)
+    
+class AgentFeedbackDeclineView(View):
+    http_method_names = ["post"]
+
+    def post(self, request, pk, *args, **kwargs):
+        fb = get_object_or_404(AgentFeedback, pk=pk)
+        fb.is_reviewed = True
+        fb.save(update_fields=["is_reviewed"])
+        msg.success(request, "Agent Feedback declined.")
+        # Redirect back to detail or to a manage page
+        return redirect(reverse('manage'))
+    
+class AgentFeedbackReportView(View):
+    http_method_names = ["post"]
+
+    def post(self, request, pk, *args, **kwargs):
+        fb = get_object_or_404(AgentFeedback, pk=pk)
+        fb.is_reviewed = True
+        fb.save(update_fields=["is_reviewed"])
+        # Future Outlook: implement some integration with a ticketing system
+        msg.success(request, "Agent Feedback reported to IT.")
+        return redirect(reverse('manage'))
+
+    
 class AcceptOfferView(LoginRequiredMixin, View):
     login_url = "/login"
 
@@ -648,3 +650,26 @@ def reset_chat(request, offer_id):
         return JsonResponse({
             "redirect_url": reverse('chat_page', kwargs={"pk": offer_id})
         }, status=200)
+
+
+class OfferFinderView(View):
+    template_name = "offer_finder.html"
+
+    def get(self, request, *args, **kwargs):
+        offer_id = request.GET.get("offer_id")
+        if not offer_id:
+            # First load: show the form
+            return render(request, self.template_name)
+
+        # Validate numeric input
+        if not offer_id.isdigit():
+            msg.error(request, "Bitte eine gültige Offer-ID angeben.")
+            return redirect(reverse("offer_finder"))
+
+        pk = int(offer_id)
+
+        # Optional: ensure the offer exists before redirect
+        get_object_or_404(CreditOffer, pk=pk)
+
+        return redirect("offer_detail", pk=pk)
+

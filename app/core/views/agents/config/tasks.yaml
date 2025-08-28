@@ -10,7 +10,7 @@ credit_approval_email_task:
     Also please keep in mind the demographic details of the person sucha as age - {client_age}, sex - {client_sex}.
     Do not explicitly mention them, just adjust your tone based on the client's demographic situation, so that the email sounds more appealing to the client.
     As next steps, make sure to prompt the user to accept the offer, if they like it, and book a consulting hour with a specialist at {bank_address} through {bank_phone_number}.
-    Make sure to end the email with a formal regard from SmartCredit. You can use emojis if the demographic situation of the customer finds it suitable..
+    Make sure to end the email with a formal regard from SmartCredit. You can use emojis if the demographic situation of the customer finds it suitable.
   expected_output: >
     A draft email that should follow the specified structure and formatting guidelines. The email should be in Markdown format.
   agent: email_assistant

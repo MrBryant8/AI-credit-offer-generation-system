@@ -11,7 +11,7 @@ class CreditOffer(models.Model):
     email_subject = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    moderator_feedback = models.TextField(null=True, blank=True)
+    moderator_feedback = models.TextField(null=True, blank=True, default="")
     is_draft = models.BooleanField(default=True)
     is_accepted = models.BooleanField(null=True, blank=True)
     is_active = models.BooleanField(default=False)

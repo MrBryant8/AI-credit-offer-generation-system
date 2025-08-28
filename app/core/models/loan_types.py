@@ -1,5 +1,7 @@
 from django.db import models
 
+
+#TODO: update with more relevant values
 class Loan(models.Model):
     id = models.AutoField(primary_key=True)
     interest = models.FloatField(help_text="Interest rate as a decimal (e.g. 0.05 = 5%)")

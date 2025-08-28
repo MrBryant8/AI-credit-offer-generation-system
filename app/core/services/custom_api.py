@@ -1,9 +1,13 @@
 from datetime import timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
 
 from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.conf import settings
 import requests
 import os
 import html
@@ -95,15 +99,17 @@ def rephraze_offer(offer):
         context_lines.append("\nClient Details:")
         context_lines.append(f"- Name: {offer.client.user.first_name} {offer.client.user.last_name}")
         context_lines.append(f"- Age: {offer.client.age}")
-        context_lines.append(f"- Employed: {offer.client.is_employed}")
-        context_lines.append(f"- Salary: {offer.client.salary}")
-        context_lines.append(f"- Current Debt: {offer.client.current_debt}")
-        context_lines.append(f"- Sex: {offer.client.sex or 'N/A'}")
+        context_lines.append(f"- Sex: {offer.client.sex}")
+        context_lines.append(f"- Job Skill Level: {offer.client.job}")
+        context_lines.append(f"- Housing: {offer.client.housing}")
+        context_lines.append(f"- Saving Account Status: {offer.client.saving_account}")
+        context_lines.append(f"- Checking Account Status: {offer.client.checking_account}")
+        context_lines.append(f"- Loan Amount Requested: {offer.client.credit_amount}")
+        context_lines.append(f"- Loan Repayment duration: {offer.client.duration}")
+        context_lines.append(f"- Loan Purpose: {offer.client.purpose}")
         context_lines.append(
-            f"- Risk Score: {offer.client.risk_score if offer.client.risk_score is not None else 'N/A'}")
-        context_lines.append(
-            f"- Propensity Score: {offer.client.propensity_score if offer.client.propensity_score is not None else 'N/A'}")
-
+            f"- Risk Score: {"Approved" if offer.client.risk_score > 0.5 else "Denied"}")
+        
     return "\n".join(context_lines)
 
 
@@ -132,3 +138,83 @@ def prepare_chat_list(user_id):
 def get_high_risk_clients(threshold):
     result = Client.objects.filter(risk_score__lt=threshold).select_related('user').order_by('risk_score')
     return result
+
+
+def send_email(to_email, subject, email_body, format="plain", encoding="utf-8"):
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@smartcredit.com')
+    host_user = getattr(settings, 'EMAIL_HOST_USER')
+    host_password = getattr(settings, 'EMAIL_HOST_PASSWORD')
+        
+    email = MIMEMultipart("alternative")
+    email.attach(MIMEText(email_body, format, encoding))
+    email["Subject"] = subject
+ 
+    with smtplib.SMTP("smtp.gmail.com", port=587) as connection:
+        connection.ehlo()
+        connection.starttls()
+        connection.login(user=host_user, password=host_password)
+        connection.sendmail(
+            from_addr=from_email,
+            to_addrs=to_email,
+            msg=email.as_string())
+        
+
+def get_agent_feedback():
+    return AgentFeedback.objects.filter(is_reviewed=False).order_by('created_at').first()
+    
+
+def redact_email_content(email_content: str):
+    """
+    Convert email_content markdown to HTML
+    """
+    if not email_content:
+        return ""
+    
+    import html
+    import re
+    
+    # First, find all blocks containing lines starting with "* "
+    def block_replacer(match):
+        block = match.group(0)
+        # Replace each bullet line with HTML <li>
+        items = re.findall(r'^\* (.+)', block, re.MULTILINE)
+        lis = ''.join(f'<li>{item}</li>' for item in items)
+        return f'<ul>{lis}</ul>'
+
+    escaped_text = html.escape(email_content)
+    
+    # Step 1: Convert markdown links [text](url) to HTML links
+    escaped_text = re.sub(
+        r'\[([^\]]+)\]\((https?://[^\)]+)\)', 
+        r'<a href="\2">\1</a>', 
+        escaped_text
+    )
+    
+    # Step 2: Convert plain URLs to clickable links
+    # Match URLs that are not already in <a> tags
+    escaped_text = re.sub(
+        r'(?<!href=")(?<!href=\')\b(https?://[^\s<>"\']+)',
+        r'<a href="\1">\1</a>',
+        escaped_text
+    )
+    
+    # Step 3: Convert **bold** to <strong>
+    escaped_text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', escaped_text)
+
+    # Step 4: Convert bullet lists
+    escaped_text = re.sub(r'(?:^\* .+\n?)+', block_replacer, escaped_text, flags=re.MULTILINE)
+    
+    # Step 5: Convert numbered lists (1. 2. 3. etc.)
+    def numbered_block_replacer(match):
+        block = match.group(0)
+        # Replace each numbered line with HTML <li>
+        items = re.findall(r'^\d+\.\s+(.+)', block, re.MULTILINE)
+        lis = ''.join(f'<li>{item}</li>' for item in items)
+        return f'<ol>{lis}</ol>'
+    
+    escaped_text = re.sub(r'(?:^\d+\.\s+.+\n?)+', numbered_block_replacer, escaped_text, flags=re.MULTILINE)
+    
+    # Step 6: Convert line breaks to <br>
+    escaped_text = escaped_text.replace('\\n', '<br>')
+    
+    return escaped_text

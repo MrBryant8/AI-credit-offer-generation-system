@@ -66,15 +66,17 @@ class ClientManager:
 
         if offer_saved:
             print(f"Offer generated for {user_name}")
+            return True
         else:
             print(f"Offer couldn't be saved for {user_name}")
+            return False
 
     
     @staticmethod
     def get_new_clients(clients_list_json):
         new_clients = []
         for client in clients_list_json:
-            if not client.get("risk_score"):
+            if not client.get("risk_score") and client.get("is_active") is False:
                 new_clients.append(client)
 
         return new_clients
