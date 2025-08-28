@@ -25,6 +25,7 @@ urlpatterns = [
     path('offer/<int:pk>/edit-email/', EditOfferEmailView.as_view(), name='edit_offer_email'),
     path('offer/<int:pk>/send-email/', SendOfferEmailView.as_view(), name='send_offer_email'),
     path("offer/<int:pk>/chat", ChatView.as_view(), name="chat_page"),
+    path("offers/find/", OfferFinderView.as_view(), name="offer_finder"),
     path('chat/<int:offer_id>/chat/save_and_reset/', save_and_reset_chat, name='save_and_reset_chat'),
     path('chat/<int:offer_id>/chat/reset/', reset_chat, name='reset_chat'),
     path('admin-dashboard/', AdminDashboardView.as_view(), name='admin_dashboard'),

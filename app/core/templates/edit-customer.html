@@ -326,7 +326,7 @@
 
                             <!-- Delete customer (POST) -->
                             <a href="{% url 'deactivate_customer' client.id %}" 
-                                class="btn btn-warning"
+                                class="btn btn-danger"
                                 onclick="return deactivateClient(event, this.href);">
                                 <i class="bi bi-person-x me-1"></i>Deaktivieren
                             </a>
@@ -368,7 +368,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return cookieValue;
     }
-    
+
     async function deactivateClient(e, url) {
         e.preventDefault();
         if (!confirm('Kunde wirklich deaktivieren?')) return false;

@@ -14,52 +14,54 @@
 {% endif %}
 
 <div class="container my-5 text-center">
-  <h2 class="mb-5">Welcome to the Management Dashboard</h2>
-  <p class="lead text-muted">Select an action to proceed.</p>
+  <h2 class="mb-3">Welcome to the Management Dashboard</h2>
+  <p class="lead text-muted mb-5">Select an action to proceed.</p>
 
-  <!-- First row of actions -->
-  <div class="d-inline-flex flex-column flex-md-row justify-content-center align-items-center gap-4 mb-5">
-    <!-- View Generated Offers -->
-    <a href="{% url 'moderator_offers' %}" class="btn btn-primary btn-lg px-5 py-3 d-flex align-items-center gap-2 shadow">
-      <i class="bi bi-list-check fs-4"></i>
-      <span>View Generated Offers</span>
-    </a>
-
-    <!-- Add Customer -->
-    <a href="{% url 'add_customer' %}" class="btn btn-success btn-lg px-5 py-3 d-flex align-items-center gap-2 shadow">
-      <i class="bi bi-person-plus fs-4"></i>
-      <span>Add Customer</span>
-    </a>
-
-    <!-- Edit Existing Customers -->
-    <a href="{% url 'edit_customers' %}" class="btn btn-warning btn-lg px-5 py-3 d-flex align-items-center gap-2 shadow">
-      <i class="bi bi-person-gear fs-4"></i>
-      <span>Edit Existing Customers</span>
-    </a>
+  <!-- Row 1 -->
+  <div class="row g-3 g-md-4 mb-4">
+    <div class="col-12 col-md-4">
+      <a href="{% url 'moderator_offers' %}" class="btn btn-primary btn-lg w-100 px-4 py-3 d-flex align-items-center justify-content-center gap-2 shadow">
+        <i class="bi bi-list-check fs-4"></i>
+        <span>View Generated Offers</span>
+      </a>
+    </div>
+    <div class="col-12 col-md-4">
+      <a href="{% url 'add_customer' %}" class="btn btn-success btn-lg w-100 px-4 py-3 d-flex align-items-center justify-content-center gap-2 shadow">
+        <i class="bi bi-person-plus fs-4"></i>
+        <span>Add Customer</span>
+      </a>
+    </div>
+    <div class="col-12 col-md-4">
+      <a href="{% url 'edit_customers' %}" class="btn btn-warning btn-lg w-100 px-4 py-3 d-flex align-items-center justify-content-center gap-2 shadow">
+        <i class="bi bi-person-gear fs-4"></i>
+        <span>Edit Existing Customers</span>
+      </a>
+    </div>
   </div>
 
-  <!-- Second row of actions -->
-  <div class="d-inline-flex flex-column flex-md-row justify-content-center align-items-center gap-4 mb-5">
-    <!-- View Declined Clients -->
-    <a href="{% url 'declined_clients' %}" class="btn btn-outline-danger btn-lg px-5 py-3 d-flex align-items-center gap-2 shadow">
-      <i class="bi bi-person-x fs-4"></i>
-      <span>View Declined Clients</span>
-    </a>
-
-    <a href="{% url 'agent_feedback' %}" class="btn btn-info btn-lg px-5 py-3 d-flex align-items-center gap-2 text-white shadow">
-      <i class="bi bi-chat-dots fs-4"></i>
-      <span>Agent Feedback</span>
-    </a>
-
-    <!-- Delete Client -->
-    <a href="" class="btn btn-outline-secondary btn-lg px-5 py-3 d-flex align-items-center gap-2 shadow">
-      <i class="bi bi-trash fs-4"></i>
-      <span>Delete Client</span>
-    </a>
+  <!-- Row 2 -->
+  <div class="row g-3 g-md-4">
+    <div class="col-12 col-md-4">
+      <a href="{% url 'declined_clients' %}" class="btn btn-outline-danger btn-lg w-100 px-4 py-3 d-flex align-items-center justify-content-center gap-2 shadow">
+        <i class="bi bi-person-x fs-4"></i>
+        <span>View Declined Clients</span>
+      </a>
+    </div>
+    <div class="col-12 col-md-4">
+      <a href="{% url 'agent_feedback' %}" class="btn btn-info btn-lg w-100 px-4 py-3 d-flex align-items-center justify-content-center gap-2 text-white shadow">
+        <i class="bi bi-chat-dots fs-4"></i>
+        <span>Agent Feedback</span>
+      </a>
+    </div>
+    <div class="col-12 col-md-4">
+      <a href="{% url 'offer_finder' %}" class="btn btn-outline-secondary btn-lg w-100 px-4 py-3 d-flex align-items-center justify-content-center gap-2 shadow">
+        <i class="bi bi-search fs-4"></i>
+        <span>Offer Finder</span>
+      </a>
+    </div>
   </div>
 </div>
 
-<!-- Bootstrap Icons (if not already included in base) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
 {% endblock %}

@@ -650,4 +650,26 @@ def reset_chat(request, offer_id):
         return JsonResponse({
             "redirect_url": reverse('chat_page', kwargs={"pk": offer_id})
         }, status=200)
-  
+
+
+class OfferFinderView(View):
+    template_name = "offer_finder.html"
+
+    def get(self, request, *args, **kwargs):
+        offer_id = request.GET.get("offer_id")
+        if not offer_id:
+            # First load: show the form
+            return render(request, self.template_name)
+
+        # Validate numeric input
+        if not offer_id.isdigit():
+            msg.error(request, "Bitte eine gültige Offer-ID angeben.")
+            return redirect(reverse("offer_finder"))
+
+        pk = int(offer_id)
+
+        # Optional: ensure the offer exists before redirect
+        get_object_or_404(CreditOffer, pk=pk)
+
+        return redirect("offer_detail", pk=pk)
+
