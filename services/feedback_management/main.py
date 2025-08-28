@@ -3,10 +3,7 @@ from google import genai
 from google.genai import types
 import os
 
-def gemini_ask(client: genai.Client, question, model="gemini-2.0-flash-lite"):
-    with open('/run/secrets/gemini_api_key', 'r') as f:
-        os.environ["GEMINI_API_KEY"] = f.read().strip()
-        
+def gemini_ask(client: genai.Client, question, model="gemini-2.0-flash-lite"): 
     return client.models.generate_content(
         model=model, 
         contents=question, 
@@ -18,12 +15,17 @@ def gemini_ask(client: genai.Client, question, model="gemini-2.0-flash-lite"):
 
 
 def run_pipeline():
+
+    with open('/run/secrets/gemini_api_key', 'r') as f:
+        os.environ["GEMINI_API_KEY"] = f.read().strip()
+       
     feedback_manager = FeedbackManager()
     feedback_list_full = feedback_manager.check_for_feedback()
     feedback_list = feedback_manager.prepare_feedback_only(feedback_list_full)
     print(f"List of feedbacks: {feedback_list}")
+    active_agent_feedback_count = feedback_manager.get_current_agent_feedback_count()
 
-    if len(feedback_list) < 10:
+    if len(feedback_list) < 5 or active_agent_feedback_count != 0:
         print("No need to update the agent task description. Insufficient feedback")
         return
 

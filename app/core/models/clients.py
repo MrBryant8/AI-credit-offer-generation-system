@@ -19,14 +19,14 @@ class Client(models.Model):
         FREE = 'free'
 
     class SavingsAccount(models.TextChoices):
-        NA = "NA"
+        NA = "unknown"
         LITTLE = "little"
         MODERATE = "moderate"
         RICH = "rich"
         QUITE_RICH = "quite rich"
 
     class CheckingAccount(models.TextChoices):
-        NA = "NA"
+        NA = "unknown"
         LITTLE = "little"
         MODERATE = "moderate"
         RICH = "rich"

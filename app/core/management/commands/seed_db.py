@@ -50,14 +50,14 @@ class Command(BaseCommand):
             },
             {
                 "interest": 0.025,
-                "amount_start": 5001,
+                "amount_start": 5000,
                 "amount_end": 15000,
                 "duration": 24,
                 "description": "Personal Loan - Medium. Perfect for medium-sized purchases or consolidations, providing competitive interest rates and manageable monthly payments."
             },
             {
                 "interest": 0.02,
-                "amount_start": 15001,
+                "amount_start": 15000,
                 "amount_end": 50000,
                 "duration": 36,
                 "description": "Personal Loan - Large. Designed for major expenses such as home improvements or education, with longer terms to ease financial planning."
@@ -71,8 +71,8 @@ class Command(BaseCommand):
             },
             {
                 "interest": 0.035,
-                "amount_start": 500,
-                "amount_end": 2500,
+                "amount_start": 0,
+                "amount_end": 1000,
                 "duration": 6,
                 "description": "Short-Term Microloan. A quick financing option for urgent, small-scale needs, ensuring fast approval and minimal paperwork."
             },
@@ -131,7 +131,7 @@ class Command(BaseCommand):
         "housing": Client.Housing.RENT,
         "saving_account": Client.SavingsAccount.NA,
         "checking_account": Client.CheckingAccount.NA,
-        "credit_amount": 0,
+        "credit_amount": 400,
         "duration": 6,
         "purpose": Client.Purpose.EDUCATION,
         "risk_score": 75,
@@ -189,30 +189,30 @@ class Command(BaseCommand):
             clients.append(client)
 
         # 4. Create 7 credit offers; ensure one client has multiple offers
-        offers_data = [
-            {"client": clients[0], "loan": loans[0], "email_content": "Offer 1 email content", "moderator_feedback": "Feedback 1" },
-            {"client": clients[0], "loan": loans[1], "email_content": "Offer 2 email content", "moderator_feedback": "Feedback 2" },
-            {"client": clients[1], "loan": loans[2], "email_content": "Offer 3 email content", "moderator_feedback": "Feedback 3" },
-            {"client": clients[2], "loan": loans[3], "email_content": "Offer 4 email content", "moderator_feedback": "Feedback 4" },
-            {"client": clients[3], "loan": loans[4], "email_content": "Offer 5 email content", "moderator_feedback": "Feedback 5" },
-            {"client": clients[4], "loan": loans[0], "email_content": "Offer 6 email content", "moderator_feedback": "Feedback 6" },
-            {"client": clients[4], "loan": loans[1], "email_content": "Offer 7 email content", "moderator_feedback": "Feedback 7" }
-        ]
+        # offers_data = [
+        #     {"client": clients[0], "loan": loans[0], "email_content": "Offer 1 email content", "moderator_feedback": "Feedback 1" },
+        #     {"client": clients[0], "loan": loans[1], "email_content": "Offer 2 email content", "moderator_feedback": "Feedback 2" },
+        #     {"client": clients[1], "loan": loans[2], "email_content": "Offer 3 email content", "moderator_feedback": "Feedback 3" },
+        #     {"client": clients[2], "loan": loans[3], "email_content": "Offer 4 email content", "moderator_feedback": "Feedback 4" },
+        #     {"client": clients[3], "loan": loans[4], "email_content": "Offer 5 email content", "moderator_feedback": "Feedback 5" },
+        #     {"client": clients[4], "loan": loans[0], "email_content": "Offer 6 email content", "moderator_feedback": "Feedback 6" },
+        #     {"client": clients[4], "loan": loans[1], "email_content": "Offer 7 email content", "moderator_feedback": "Feedback 7" }
+        # ]
 
-        for idx, od in enumerate(offers_data, start=1):
-            offer,created = CreditOffer.objects.get_or_create(
-                email_content=od["email_content"],
-                defaults={
-                    "client": od["client"],
-                    "loan_type": od["loan"],
-                    "moderator_feedback": od["moderator_feedback"]
-                }
-            )
-            if created:
-                self.stdout.write(self.style.SUCCESS(f"Created Offer #{idx} for Client #{od['client'].id}"))
-            else:
-                self.stdout.write(
-                    f"Offer already exists (User: {od['client'].id}, Loan Type: {od['loan'].description})")
+        # for idx, od in enumerate(offers_data, start=1):
+        #     offer,created = CreditOffer.objects.get_or_create(
+        #         email_content=od["email_content"],
+        #         defaults={
+        #             "client": od["client"],
+        #             "loan_type": od["loan"],
+        #             "moderator_feedback": od["moderator_feedback"]
+        #         }
+        #     )
+        #     if created:
+        #         self.stdout.write(self.style.SUCCESS(f"Created Offer #{idx} for Client #{od['client'].id}"))
+        #     else:
+        #         self.stdout.write(
+        #             f"Offer already exists (User: {od['client'].id}, Loan Type: {od['loan'].description})")
 
         self.stdout.write(self.style.SUCCESS("Database seeding completed!"))
 

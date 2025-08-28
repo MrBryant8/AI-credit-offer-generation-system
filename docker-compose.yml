@@ -37,7 +37,7 @@ services:
             - gmail_user_email
             - gmail_app_password
         environment:
-            - RISK_THRESHOLD=0.20
+            - RISK_THRESHOLD=0.25
         volumes:
             - ./app:/usr/src/app
         ports:
@@ -52,7 +52,7 @@ services:
         container_name: client_management
         restart: "no"
         environment:
-            - RISK_THRESHOLD=0.20
+            - RISK_THRESHOLD=0.25
         volumes:
             - ./ml/output:/usr/src/services/client_management/ml/output
         depends_on:

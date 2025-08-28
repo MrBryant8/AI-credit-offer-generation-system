@@ -208,13 +208,7 @@ class ManageView(LoginRequiredMixin, UserPassesTestMixin, View):
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     def get(self, request):
-
-        threshold = getattr(settings, 'RISK_THRESHOLD', 0.25)
-        high_risk_clients = get_high_risk_clients(threshold)
-        context = {
-            'high_risk_clients': high_risk_clients,
-        }
-        return render(request, 'manage.html', context)
+        return render(request, 'manage.html')
 
 
 class ModeratorOffersView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -275,7 +269,7 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
             return redirect('offer_detail', pk=pk)
  
         to_email = [getattr(settings, 'DEFAULT_EMAIL_RECEIVER') if offer.client.user.id < 6 else offer.client.user.email] # Skip first 5 customers as they are dummy users
-        email_content_redacted = self.redact_email_content(offer.email_content)
+        email_content_redacted = redact_email_content(offer.email_content)
 
         try:
             send_email(to_email, offer.email_subject, email_content_redacted, format="html")
@@ -292,62 +286,6 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
         
         return redirect('offer_detail', pk=pk)
     
-    @staticmethod
-    def redact_email_content(email_content: str):
-        """
-        Convert email_content markdown to HTML
-        """
-        if not email_content:
-            return ""
-        
-        import html
-        import re
-        
-        # First, find all blocks containing lines starting with "* "
-        def block_replacer(match):
-            block = match.group(0)
-            # Replace each bullet line with HTML <li>
-            items = re.findall(r'^\* (.+)', block, re.MULTILINE)
-            lis = ''.join(f'<li>{item}</li>' for item in items)
-            return f'<ul>{lis}</ul>'
-
-        escaped_text = html.escape(email_content)
-        
-        # Step 1: Convert markdown links [text](url) to HTML links
-        escaped_text = re.sub(
-            r'\[([^\]]+)\]\((https?://[^\)]+)\)', 
-            r'<a href="\2">\1</a>', 
-            escaped_text
-        )
-        
-        # Step 2: Convert plain URLs to clickable links
-        # Match URLs that are not already in <a> tags
-        escaped_text = re.sub(
-            r'(?<!href=")(?<!href=\')\b(https?://[^\s<>"\']+)',
-            r'<a href="\1">\1</a>',
-            escaped_text
-        )
-        
-        # Step 3: Convert **bold** to <strong>
-        escaped_text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', escaped_text)
-
-        # Step 4: Convert bullet lists
-        escaped_text = re.sub(r'(?:^\* .+\n?)+', block_replacer, escaped_text, flags=re.MULTILINE)
-        
-        # Step 5: Convert numbered lists (1. 2. 3. etc.)
-        def numbered_block_replacer(match):
-            block = match.group(0)
-            # Replace each numbered line with HTML <li>
-            items = re.findall(r'^\d+\.\s+(.+)', block, re.MULTILINE)
-            lis = ''.join(f'<li>{item}</li>' for item in items)
-            return f'<ol>{lis}</ol>'
-        
-        escaped_text = re.sub(r'(?:^\d+\.\s+.+\n?)+', numbered_block_replacer, escaped_text, flags=re.MULTILINE)
-        
-        # Step 6: Convert line breaks to <br>
-        escaped_text = escaped_text.replace('\\n', '<br>')
-        
-        return escaped_text
 
     
 class AddCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -474,7 +412,81 @@ class EditCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
             'client': client,
             'is_editing': True,
         })
+    
+class DeleteCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
+    pass
+    
+class DeclinedClientsView(LoginRequiredMixin, UserPassesTestMixin, View):
+    login_url = "/login"
 
+    def test_func(self):
+        return self.request.user.is_moderator
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("Sie haben keine Berechtigung, diesen Kunden zu bearbeiten.")
+        return super().handle_no_permission()
+    
+    def get(self, request):
+        threshold = getattr(settings, 'RISK_THRESHOLD', 0.25)
+        high_risk_clients = get_high_risk_clients(threshold)
+        context = {
+            'high_risk_clients': high_risk_clients,
+        }
+
+        return render(request, "high-risk-clients.html", context)
+
+
+class AgentFeedbackView(LoginRequiredMixin, UserPassesTestMixin, View):
+    login_url = "/login"
+
+    def test_func(self):
+        return self.request.user.is_moderator
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("Sie haben keine Berechtigung, diesen Kunden zu bearbeiten.")
+        return super().handle_no_permission()
+    
+    def get(self, request):
+        
+        agent_feedback_object = get_agent_feedback()
+        if agent_feedback_object:
+            agent_feedback_object.feedback = redact_email_content(agent_feedback_object.feedback.split(":", 1)[-1])
+            context = {
+                "agent_feedback": agent_feedback_object,
+            }
+        else:
+            context = {
+                "agent_feedback": {
+                    "feedback": None
+                }
+            }
+        return render(request, "agent-feedback.html", context)
+    
+class AgentFeedbackDeclineView(View):
+    http_method_names = ["post"]
+
+    def post(self, request, pk, *args, **kwargs):
+        fb = get_object_or_404(AgentFeedback, pk=pk)
+        fb.is_reviewed = True
+        fb.save(update_fields=["is_reviewed"])
+        msg.success(request, "Agent Feedback declined.")
+        # Redirect back to detail or to a manage page
+        return redirect(reverse('manage'))
+    
+class AgentFeedbackReportView(View):
+    http_method_names = ["post"]
+
+    def post(self, request, pk, *args, **kwargs):
+        fb = get_object_or_404(AgentFeedback, pk=pk)
+        fb.is_reviewed = True
+        fb.save(update_fields=["is_reviewed"])
+        # Future Outlook: implement some integration with a ticketing system
+        msg.success(request, "Agent Feedback reported to IT.")
+        return redirect(reverse('manage'))
+
+    
 class AcceptOfferView(LoginRequiredMixin, View):
     login_url = "/login"
 
@@ -630,3 +642,4 @@ def reset_chat(request, offer_id):
         return JsonResponse({
             "redirect_url": reverse('chat_page', kwargs={"pk": offer_id})
         }, status=200)
+  

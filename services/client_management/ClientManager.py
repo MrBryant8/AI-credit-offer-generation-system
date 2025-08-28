@@ -66,8 +66,10 @@ class ClientManager:
 
         if offer_saved:
             print(f"Offer generated for {user_name}")
+            return True
         else:
             print(f"Offer couldn't be saved for {user_name}")
+            return False
 
     
     @staticmethod

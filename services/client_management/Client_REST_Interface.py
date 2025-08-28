@@ -71,4 +71,7 @@ class REST:
             "email_content": email_content
         }
         response = requests.post(url, json=payload, headers=self.headers, timeout=60)
+        print(response.text)
+        print(response.status_code)
+        print(response.content)
         return 200 <= response.status_code < 300

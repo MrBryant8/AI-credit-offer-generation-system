@@ -33,6 +33,11 @@ class REST:
         response = requests.post(url=url, headers=self.headers, json={"feedback": new_feedback})
         if 200 <= response.status_code < 300:
             print("Agent Feedback Changed successfully.")
+
+    def get_agent_feedback_objects(self):
+        url = f"{self.rest_url}/agent-feedbacks/"
+        response = requests.get(url=url, headers=self.headers).json()
+        return response
  
 
 

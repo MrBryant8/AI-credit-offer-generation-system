@@ -5,8 +5,7 @@
 {% if messages %}
   <div class="container mt-3">
     {% for message in messages %}
-      <div class="alert 
-        {% if message.tags %} alert-{{ message.tags }} {% else %} alert-info {% endif %} alert-dismissible fade show" role="alert">
+      <div class="alert {% if message.tags %} alert-{{ message.tags }} {% else %} alert-info {% endif %} alert-dismissible fade show" role="alert">
         {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
@@ -17,20 +16,21 @@
 <div class="container my-5 text-center">
   <h2 class="mb-5">Welcome to the Management Dashboard</h2>
   <p class="lead text-muted">Select an action to proceed.</p>
-  
+
+  <!-- First row of actions -->
   <div class="d-inline-flex flex-column flex-md-row justify-content-center align-items-center gap-4 mb-5">
     <!-- View Generated Offers -->
     <a href="{% url 'moderator_offers' %}" class="btn btn-primary btn-lg px-5 py-3 d-flex align-items-center gap-2 shadow">
       <i class="bi bi-list-check fs-4"></i>
       <span>View Generated Offers</span>
     </a>
-    
+
     <!-- Add Customer -->
     <a href="{% url 'add_customer' %}" class="btn btn-success btn-lg px-5 py-3 d-flex align-items-center gap-2 shadow">
       <i class="bi bi-person-plus fs-4"></i>
       <span>Add Customer</span>
     </a>
-    
+
     <!-- Edit Existing Customers -->
     <a href="{% url 'edit_customers' %}" class="btn btn-warning btn-lg px-5 py-3 d-flex align-items-center gap-2 shadow">
       <i class="bi bi-person-gear fs-4"></i>
@@ -38,105 +38,28 @@
     </a>
   </div>
 
-  <!-- High-Risk Clients Table -->
-  <div class="mt-5">
-    <div class="card shadow">
-      <div class="card-header bg-danger text-white">
-        <h4 class="mb-0">
-          <i class="bi bi-exclamation-triangle me-2"></i>
-          High-Risk Clients (Risk Score < 0.25)
-        </h4>
-      </div>
-      <div class="card-body p-0">
-        {% if high_risk_clients %}
-          <div class="table-responsive">
-            <table class="table table-hover mb-0 align-middle">
-              <thead class="table-dark">
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Telefon</th>
-                  <th>Identity Number</th>
-                  <th>Age</th>
-                  <th>Sex</th>
-                  <th>Job</th>
-                  <th>Housing</th>
-                  <th>Saving Account</th>
-                  <th>Checking Account</th>
-                  <th>Credit Amount</th>
-                  <th>Duration</th>
-                  <th>Purpose</th>
-                  <th class="text-danger">Risk Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for client in high_risk_clients %}
-                  <tr class="{% if client.risk_score < 0.15 %}table-danger{% elif client.risk_score < 0.20 %}table-warning{% endif %}">
-                    <td>{{ client.id }}</td>
-                    <td>
-                      <strong>{{ client.user.first_name }} {{ client.user.last_name }}</strong>
-                    </td>
-                    <td>{{ client.user.email }}</td>
-                    <td>
-                        {% if client.user.phone_number %}
-                          {{ client.user.phone_number }}
-                        {% else %}
-                            <span class="text-muted">—</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ client.identity_number }}</td>
-                    <td>{{ client.age }}</td>
-                    <td>{{ client.get_sex_display|default:client.sex }}</td>
-                    <td>{{ client.get_job_display|default:client.job }}</td>
-                    <td>{{ client.get_housing_display|default:client.housing }}</td>
-                    <td>{{ client.get_saving_account_display|default:client.saving_account }}</td>
-                    <td>{{ client.get_checking_account_display|default:client.checking_account }}</td>
-                    <td>€{{ client.credit_amount|floatformat:0 }}</td>
-                    <td>{{ client.duration }} months</td>
-                    <td>{{ client.get_purpose_display|default:client.purpose }}</td>
-                    <td class="text-danger">
-                      <strong>{{ client.risk_score|floatformat:3 }}</strong>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+  <!-- Second row of actions -->
+  <div class="d-inline-flex flex-column flex-md-row justify-content-center align-items-center gap-4 mb-5">
+    <!-- View Declined Clients -->
+    <a href="{% url 'declined_clients' %}" class="btn btn-outline-danger btn-lg px-5 py-3 d-flex align-items-center gap-2 shadow">
+      <i class="bi bi-person-x fs-4"></i>
+      <span>View Declined Clients</span>
+    </a>
 
-          <!-- Information Note Below Table -->
-          <div class="card-footer bg-light border-top">
-            <div class="alert alert-info mb-0" role="alert">
-              <div class="d-flex align-items-start">
-                <i class="bi bi-info-circle-fill text-info me-3 mt-1" style="font-size: 1.2rem;"></i>
-                <div>
-                  <h6 class="alert-heading mb-2">
-                    <strong>Credit Agent Instructions</strong>
-                  </h6>
-                  <p class="mb-2">
-                    The clients listed above have <strong>risk scores below 0.25</strong>, indicating elevated credit risk. 
-                    As a credit agent, you should carefully analyze each client's profile and decide on the appropriate course of action.
-                  </p>
-                  <p class="mb-0 small">
-                    <strong>Recommended actions:</strong> Review individual client details, consider additional verification, 
-                    implement enhanced monitoring, or apply stricter loan terms based on your professional assessment.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        {% else %}
-          <div class="text-center py-5">
-            <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
-            <h4 class="text-success mt-3">No High-Risk Clients Found</h4>
-            <p class="text-muted">All clients have risk scores above 0.25</p>
-          </div>
-        {% endif %}
-      </div>
-    </div>
+    <a href="{% url 'agent_feedback' %}" class="btn btn-info btn-lg px-5 py-3 d-flex align-items-center gap-2 text-white shadow">
+      <i class="bi bi-chat-dots fs-4"></i>
+      <span>Agent Feedback</span>
+    </a>
+
+    <!-- Delete Client -->
+    <a href="" class="btn btn-outline-secondary btn-lg px-5 py-3 d-flex align-items-center gap-2 shadow">
+      <i class="bi bi-trash fs-4"></i>
+      <span>Delete Client</span>
+    </a>
   </div>
 </div>
 
-<!-- Bootstrap Icons CDN (if not already included elsewhere) -->
+<!-- Bootstrap Icons (if not already included in base) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
 {% endblock %}

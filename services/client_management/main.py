@@ -11,8 +11,9 @@ def run_pipeline():
             cm.rest.add_risk_score_to_customer(client.get("id"), low_risk_probability)
             continue
 
-        cm.create_offer(client)
-        cm.rest.add_risk_score_to_customer(client.get("id"), low_risk_probability)
+        offer_created = cm.create_offer(client)
+        if offer_created:
+            cm.rest.add_risk_score_to_customer(client.get("id"), low_risk_probability)
 
 
 

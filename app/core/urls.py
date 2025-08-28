@@ -32,8 +32,13 @@ urlpatterns = [
     path("manage/", ManageView.as_view(), name="manage"),
     path("manage/suggested-offers", ModeratorOffersView.as_view(), name="moderator_offers"),
     path("manage/add-customer", AddCustomerView.as_view(), name="add_customer"),
-    path("manage/edit-customers", EditCustomersView.as_view(), name="edit_customers"),
+    path("manage/edit-customers/", EditCustomersView.as_view(), name="edit_customers"),
     path("manage/edit-customer/<int:pk>/", EditCustomerView.as_view(), name="edit_customer"),
+    path("manage/view-declined-customers/", DeclinedClientsView.as_view(), name="declined_clients"),
+    path("manage/view-agent-feedback/", AgentFeedbackView.as_view(), name="agent_feedback"),
+    path("manage/feedback/<int:pk>/decline/", AgentFeedbackDeclineView.as_view(), name="decline_agent_feedback"),
+    path("manage/feedback/<int:pk>/report/", AgentFeedbackReportView.as_view(), name="report_agent_feedback"),
+    path("manage/delete-customer/", DeleteCustomerView.as_view(), name="delete_client"),
     path("create-email/", write_email, name="create_email"),
     path('api/', include(router.urls))
 ]
