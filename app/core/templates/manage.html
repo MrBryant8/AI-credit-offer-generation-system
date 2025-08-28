@@ -26,6 +26,22 @@
       </a>
     </div>
     <div class="col-12 col-md-4">
+      <a href="{% url 'offer_finder' %}" class="btn btn-secondary btn-lg w-100 px-4 py-3 d-flex align-items-center justify-content-center gap-2 shadow">
+        <i class="bi bi-search fs-4"></i>
+        <span>Offer Finder</span>
+      </a>
+    </div>
+    <div class="col-12 col-md-4">
+      <a href="{% url 'agent_feedback' %}" class="btn btn-info btn-lg w-100 px-4 py-3 d-flex align-items-center justify-content-center gap-2 text-white shadow">
+        <i class="bi bi-chat-dots fs-4"></i>
+        <span>Agent Feedback</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Row 2 -->
+  <div class="row g-3 g-md-4">
+    <div class="col-12 col-md-4">
       <a href="{% url 'add_customer' %}" class="btn btn-success btn-lg w-100 px-4 py-3 d-flex align-items-center justify-content-center gap-2 shadow">
         <i class="bi bi-person-plus fs-4"></i>
         <span>Add Customer</span>
@@ -37,26 +53,10 @@
         <span>Edit Existing Customers</span>
       </a>
     </div>
-  </div>
-
-  <!-- Row 2 -->
-  <div class="row g-3 g-md-4">
     <div class="col-12 col-md-4">
-      <a href="{% url 'declined_clients' %}" class="btn btn-outline-danger btn-lg w-100 px-4 py-3 d-flex align-items-center justify-content-center gap-2 shadow">
+      <a href="{% url 'declined_clients' %}" class="btn btn-danger btn-lg w-100 px-4 py-3 d-flex align-items-center justify-content-center gap-2 shadow">
         <i class="bi bi-person-x fs-4"></i>
         <span>View Declined Clients</span>
-      </a>
-    </div>
-    <div class="col-12 col-md-4">
-      <a href="{% url 'agent_feedback' %}" class="btn btn-info btn-lg w-100 px-4 py-3 d-flex align-items-center justify-content-center gap-2 text-white shadow">
-        <i class="bi bi-chat-dots fs-4"></i>
-        <span>Agent Feedback</span>
-      </a>
-    </div>
-    <div class="col-12 col-md-4">
-      <a href="{% url 'offer_finder' %}" class="btn btn-outline-secondary btn-lg w-100 px-4 py-3 d-flex align-items-center justify-content-center gap-2 shadow">
-        <i class="bi bi-search fs-4"></i>
-        <span>Offer Finder</span>
       </a>
     </div>
   </div>

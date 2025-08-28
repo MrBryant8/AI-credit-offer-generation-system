@@ -85,6 +85,7 @@ def rephraze_offer(offer):
        Given a CreditOffer ID, returns all relevant relational data
        from CreditOffer, Loan, and Client for context building in an LLM chatbot.
     """
+    RISK_THRESHOLD = getattr(settings, "RISK_THRESHOLD")
     context_lines = []
     # Add more context if needed
     if offer.loan_type:
@@ -107,8 +108,9 @@ def rephraze_offer(offer):
         context_lines.append(f"- Loan Amount Requested: {offer.client.credit_amount}")
         context_lines.append(f"- Loan Repayment duration: {offer.client.duration}")
         context_lines.append(f"- Loan Purpose: {offer.client.purpose}")
+        context_lines.append(f"- Is offer active? {"Yes" if offer.is_active else "No"}")
         context_lines.append(
-            f"- Risk Score: {"Approved" if offer.client.risk_score > 0.5 else "Denied"}")
+            f"- Loan Approved: {"Approved" if offer.client.risk_score and offer.client.risk_score > RISK_THRESHOLD  else "Denied"}")
         
     return "\n".join(context_lines)
 

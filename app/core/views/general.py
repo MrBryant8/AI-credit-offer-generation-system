@@ -401,6 +401,7 @@ class EditCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
             client = client_form.save(commit=False)
             client.user = user  # Ensure the relationship is maintained
             client.risk_score = None
+            CreditOffer.objects.filter(client=client).update(is_active=False)
             client.save()
             
             msg.success(request, f"Kunde {user.first_name} {user.last_name} wurde erfolgreich aktualisiert.")
