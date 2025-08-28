@@ -1,11 +1,10 @@
 import markdown
-from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages as msg
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.messages import get_messages
 from django.contrib.auth.views import  PasswordChangeView
-from django.core.mail import send_mail
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
@@ -18,9 +17,6 @@ from ..forms import *
 from ..services.custom_api import *
 from django.core.paginator import Paginator
 from .agents.crew import EmailCrew
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 
 class LandingPageView(View):
@@ -32,8 +28,8 @@ class HomePageView(View):
     def get(self, request):
         return render(request, 'home.html')
 
-# TODO: check this out
-class CustomPasswordChangeView(PasswordChangeView):
+
+class CustomPasswordChangeView(PasswordChangeView, LoginRequiredMixin):
     form_class = CustomPasswordChangeForm
     template_name = 'registration/password_change_form.html'
     success_url = reverse_lazy('home')
@@ -41,20 +37,11 @@ class CustomPasswordChangeView(PasswordChangeView):
     def form_valid(self, form):
         user = form.save()
 
-        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@smartcredit.com')
-        user_email = getattr(settings, 'EMAIL_HOST_USER')
-        password = getattr(settings, 'EMAIL_HOST_PASSWORD')
         to_email = [getattr(settings, 'DEFAULT_EMAIL_RECEIVER') if user.id < 6 else user.email] # Skip first 5 customers as they are dummy users
-        
-        with smtplib.SMTP("smtp.gmail.com", port=587) as connection:
-            connection.ehlo()
-            connection.starttls()
-            connection.login(user=user_email, password=password)
-            connection.sendmail(
-                from_addr=from_email,
-                to_addrs=to_email,
-                msg="Subject:SmartCredit - Passwort geändert\n\n" + f'Hallo {user.get_full_name()},\n\nIhr Passwort wurde erfolgreich geändert.\n\nBest regards, Smart Credit Team'
-                )
+        subject = "SmartCredit - Passwort geändert"
+        body = f"Hallo {user.get_full_name()},\n\nIhr Passwort wurde erfolgreich geändert.\n\nBest regards, Smart Credit Team"
+
+        send_email(to_email, subject, body)
         
         # Keep user logged in
         update_session_auth_hash(self.request, user)
@@ -286,26 +273,12 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
         if not offer.email_content:
             msg.error(request, "Keine E-Mail-Inhalte für dieses Angebot verfügbar.")
             return redirect('offer_detail', pk=pk)
-
-        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@smartcredit.com')
-        user_email = getattr(settings, 'EMAIL_HOST_USER')
-        password = getattr(settings, 'EMAIL_HOST_PASSWORD')
+ 
         to_email = [getattr(settings, 'DEFAULT_EMAIL_RECEIVER') if offer.client.user.id < 6 else offer.client.user.email] # Skip first 5 customers as they are dummy users
         email_content_redacted = self.redact_email_content(offer.email_content)
-        email = MIMEMultipart("alternative")
-        email["Subject"] = offer.email_subject
-        email.attach(MIMEText(email_content_redacted, "html"))
 
         try:
-            with smtplib.SMTP("smtp.gmail.com", port=587) as connection:
-                connection.ehlo()
-                connection.starttls()
-                connection.login(user=user_email, password=password)
-                connection.sendmail(
-                    from_addr=from_email,
-                    to_addrs=to_email,
-                    msg=email.as_string()
-                    )
+            send_email(to_email, offer.email_subject, email_content_redacted, format="html")
                 
             offer.is_draft = False
             offer.is_active = True

@@ -1,9 +1,13 @@
 from datetime import timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
 
 from django.db import IntegrityError
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.conf import settings
 import requests
 import os
 import html
@@ -134,3 +138,23 @@ def prepare_chat_list(user_id):
 def get_high_risk_clients(threshold):
     result = Client.objects.filter(risk_score__lt=threshold).select_related('user').order_by('risk_score')
     return result
+
+
+def send_email(to_email, subject, email_body, format="plain", encoding="utf-8"):
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@smartcredit.com')
+    host_user = getattr(settings, 'EMAIL_HOST_USER')
+    host_password = getattr(settings, 'EMAIL_HOST_PASSWORD')
+        
+    email = MIMEMultipart("alternative")
+    email.attach(MIMEText(email_body, format, encoding))
+    email["Subject"] = subject
+ 
+    with smtplib.SMTP("smtp.gmail.com", port=587) as connection:
+        connection.ehlo()
+        connection.starttls()
+        connection.login(user=host_user, password=host_password)
+        connection.sendmail(
+            from_addr=from_email,
+            to_addrs=to_email,
+            msg=email.as_string())
+        
