@@ -8,7 +8,6 @@ from django.contrib.auth.views import  PasswordChangeView
 from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from django.views.decorators.http import require_POST
 from django.views.generic import FormView, DetailView, UpdateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.utils.safestring import mark_safe
@@ -38,11 +37,10 @@ class CustomPasswordChangeView(PasswordChangeView, LoginRequiredMixin):
     def form_valid(self, form):
         user = form.save()
 
-        to_email = [getattr(settings, 'DEFAULT_EMAIL_RECEIVER') if user.id < 6 else user.email] # Skip first 5 customers as they are dummy users
         subject = "SmartCredit - Passwort geändert"
         body = f"Hallo {user.get_full_name()},\n\nIhr Passwort wurde erfolgreich geändert.\n\nBest regards, Smart Credit Team"
 
-        send_email(to_email, subject, body)
+        send_email(user.email, subject, body)
         
         # Keep user logged in
         update_session_auth_hash(self.request, user)
@@ -269,11 +267,10 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
             msg.error(request, "Keine E-Mail-Inhalte für dieses Angebot verfügbar.")
             return redirect('offer_detail', pk=pk)
  
-        to_email = [getattr(settings, 'DEFAULT_EMAIL_RECEIVER') if offer.client.user.id < 6 else offer.client.user.email] # Skip first 5 customers as they are dummy users
-        email_content_redacted = redact_email_content(offer.email_content)
+        email_content_redacted = redact_markdown_content(offer.email_content)
 
         try:
-            send_email(to_email, offer.email_subject, email_content_redacted, format="html")
+            send_email(offer.client.user.email, offer.email_subject, email_content_redacted, format="html")
                 
             offer.is_draft = False
             offer.is_active = True
@@ -461,7 +458,7 @@ class AgentFeedbackView(LoginRequiredMixin, UserPassesTestMixin, View):
         
         agent_feedback_object = get_agent_feedback()
         if agent_feedback_object:
-            agent_feedback_object.feedback = redact_email_content(agent_feedback_object.feedback.split(":", 1)[-1])
+            agent_feedback_object.feedback = redact_markdown_content(agent_feedback_object.feedback.split(":", 1)[-1])
             context = {
                 "agent_feedback": agent_feedback_object,
             }

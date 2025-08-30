@@ -38,6 +38,7 @@ services:
             - gmail_app_password
         environment:
             - RISK_THRESHOLD=0.25
+            - DEFAULT_EMAIL_RECEIVER=solo_tan@abv.bg
         volumes:
             - ./app:/usr/src/app
         ports:

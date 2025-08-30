@@ -142,11 +142,14 @@ def get_high_risk_clients(threshold):
     return result
 
 
-def send_email(to_email, subject, email_body, format="plain", encoding="utf-8"):
+def send_email(receiver_email, subject, email_body, format="plain", encoding="utf-8"):
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@smartcredit.com')
     host_user = getattr(settings, 'EMAIL_HOST_USER')
     host_password = getattr(settings, 'EMAIL_HOST_PASSWORD')
-        
+    to_email_list = [getattr(settings, 'DEFAULT_EMAIL_RECEIVER')]
+    if not receiver_email.endswith("@smartcredit.com"):
+        to_email_list.append(receiver_email)
+
     email = MIMEMultipart("alternative")
     email.attach(MIMEText(email_body, format, encoding))
     email["Subject"] = subject
@@ -157,7 +160,7 @@ def send_email(to_email, subject, email_body, format="plain", encoding="utf-8"):
         connection.login(user=host_user, password=host_password)
         connection.sendmail(
             from_addr=from_email,
-            to_addrs=to_email,
+            to_addrs=to_email_list,
             msg=email.as_string())
         
 
@@ -165,7 +168,7 @@ def get_agent_feedback():
     return AgentFeedback.objects.filter(is_reviewed=False).order_by('created_at').first()
     
 
-def redact_email_content(email_content: str):
+def redact_markdown_content(email_content: str):
     """
     Convert email_content markdown to HTML
     """
