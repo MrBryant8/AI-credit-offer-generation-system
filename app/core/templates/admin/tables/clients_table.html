@@ -5,28 +5,54 @@
   <thead class="table-light">
     <tr>
       <th>ID</th>
-      <th>User Email</th>
+      <th>Email</th>
       <th>Age</th>
       <th>Sex</th>
-      <th>Employed</th>
-      <th>Salary (€)</th>
-      <th>Current Debt (€)</th>
+      <th>Job</th>
+      <th>Housing</th>
+      <th>Saving Account</th>
+        <th>Checking Account</th>
+        <th>Credit Amount (€) Requested</th>
+        <th>Credit Duration (M) Expected</th>
+        <th>Credit Purpose</th>
+        <th>Active</th>
       <th>Risk Score</th>
-      <th>Propensity Score</th>
+
     </tr>
   </thead>
   <tbody>
     {% for client in page_obj %}
     <tr>
-      <td>{{ client.id }}</td>
-      <td>{% if client.user %}{{ client.user.email }}{% else %}-{% endif %}</td>
+      <td>{{ client.identity_number }}</td>
+      <td>
+          {% if client.user %}
+              {{ client.user.email }}
+          {% else %}
+              -
+          {% endif %}
+      </td>
       <td>{{ client.age }}</td>
       <td>{{ client.get_sex_display|default:"-" }}</td>
-      <td>{% if client.is_employed %}Yes{% else %}No{% endif %}</td>
-      <td>{{ client.salary }}</td>
-      <td>{{ client.current_debt }}</td>
+      <td>
+          {% if client.job == 0 %}
+            None
+          {% elif client.job == 1 %}
+            Low skill
+          {% elif client.job == 2 %}
+            Medium skill
+          {% else %}
+            High skill
+          {% endif %}
+      </td>
+        <td>{{ client.housing }}</td>
+        <td>{{ client.saving_account }}</td>
+      <td>{{ client.checking_account }}</td>
+      <td>{{ client.credit_amount }}</td>
+      <td>{{ client.duration }}</td>
+      <td>{{ client.purpose }}</td>
+      <td>{% if client.is_active %}Yes{% else %}No{% endif %}</td>
       <td>{% if client.risk_score is not none %}{{ client.risk_score }}{% else %}-{% endif %}</td>
-      <td>{% if client.propensity_score is not none %}{{ client.propensity_score }}{% else %}-{% endif %}</td>
+
     </tr>
     {% empty %}
     <tr><td colspan="9" class="text-center">No clients found.</td></tr>

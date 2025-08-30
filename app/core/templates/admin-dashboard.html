@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container my-5">
-  <h2 class="mb-4 text-center">Admin Control Panel</h2>
+  <h2 class="mb-4 text-center">Admin Dashboard</h2>
 
   <!-- Anchor tags styled as buttons -->
   <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
@@ -10,8 +10,6 @@
     <a href="{% url 'admin_dashboard' %}?model=clients" class="btn btn-secondary btn-lg">Clients</a>
     <a href="{% url 'admin_dashboard' %}?model=loans" class="btn btn-success btn-lg">Loans</a>
     <a href="{% url 'admin_dashboard' %}?model=offers" class="btn btn-warning btn-lg">Credit Offers</a>
-    <a href="{% url 'admin_dashboard' %}?model=messages" class="btn btn-info btn-lg">Messages</a>
-    <a href="{% url 'admin_dashboard' %}?model=chats" class="btn btn-dark btn-lg">Chats</a>
   </div>
 
   <!-- Optionally, you can keep or remove this container based on your needs -->

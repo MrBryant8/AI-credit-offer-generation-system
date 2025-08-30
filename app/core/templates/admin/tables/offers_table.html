@@ -7,10 +7,8 @@
       <th>ID</th>
       <th>Client</th>
       <th>Loan Type</th>
-      <th>Amount Range (€)</th>
       <th>Status</th>
       <th>Created At</th>
-      <th>Expires At</th>
       <th>Active</th>
     </tr>
   </thead>
@@ -18,19 +16,33 @@
     {% for offer in page_obj %}
     <tr>
       <td>{{ offer.id }}</td>
-      <td>{% if offer.client.user %}{{ offer.client.user.email }}{% else %}--{% endif %}</td>
-      <td>{{ offer.loan_type.description|default:"-" }}</td>
-      <td>{{ offer.loan_type.amount_start }} – {{ offer.loan_type.amount_end }}</td>
       <td>
-        {% if offer.is_accepted %}
-          <span class="badge bg-success">Accepted</span>
+          {% if offer.client.user %}
+              {{ offer.client.user.email }}
+          {% else %}
+              --
+          {% endif %}
+      </td>
+      <td>{{ offer.loan_type.description|default:"-" }}</td>
+      <td>
+        {% if offer.is_accepted == True %}
+          <span class="badge bg-success">Akzeptiert</span>
+        {% elif offer.is_accepted == False %}
+          <span class="badge bg-danger">Abgelehnt</span>
         {% else %}
-          <span class="badge bg-danger">Declined</span>
+          <span class="badge bg-secondary">Pending</span>
         {% endif %}
       </td>
       <td>{{ offer.created_at|date:"d.m.Y" }}</td>
-      <td>{{ offer.expires_at|date:"d.m.Y" }}</td>
-      <td>{% if offer.is_active %}Yes{% else %}No{% endif %}</td>
+      <td>
+          {% if offer.is_draft %}
+              <span class="badge bg-secondary">Entwurf</span>
+          {% elif offer.is_active %}
+              <span class="badge bg-success">Ja</span>
+          {% else %}
+              <span class="badge bg-danger">Nein</span>
+          {% endif %}
+      </td>
     </tr>
     {% empty %}
     <tr><td colspan="8" class="text-center">No credit offers found.</td></tr>

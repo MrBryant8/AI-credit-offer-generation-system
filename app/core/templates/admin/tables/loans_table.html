@@ -4,7 +4,6 @@
 <table class="table table-striped table-bordered align-middle">
   <thead class="table-light">
     <tr>
-      <th>ID</th>
       <th>Description</th>
       <th>Interest (%)</th>
       <th>Amount Range (€)</th>
@@ -14,7 +13,6 @@
   <tbody>
     {% for loan in page_obj %}
     <tr>
-      <td>{{ loan.id }}</td>
       <td>{{ loan.description|default:"-" }}</td>
       <td>{{ loan.interest|floatformat:2 }}</td>
       <td>{{ loan.amount_start }} – {{ loan.amount_end }}</td>
