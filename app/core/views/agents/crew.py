@@ -13,7 +13,10 @@ class Email(BaseModel):
 
 @CrewBase
 class EmailCrew():
-  """CreditApprovalEmail crew"""
+  """
+  Credit Approval Email crew.
+  Agentic Crew that handles email generation based on the client. Uses Gemini as LLM
+  """
   
   @llm
   def gemini_llm(self) -> LLM:

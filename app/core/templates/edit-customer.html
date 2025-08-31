@@ -13,10 +13,10 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">
                             <i class="bi bi-person-gear me-2"></i>
-                            Kunde bearbeiten: {{ client.user.first_name }} {{ client.user.last_name }}
+                            Edit Client: {{ client.user.first_name }} {{ client.user.last_name }}
                         </h4>
                         <a href="{% url 'edit_customers' %}" class="btn btn-outline-light btn-sm">
-                            <i class="bi bi-arrow-left me-1"></i>Zurück zur Liste
+                            <i class="bi bi-arrow-left me-1"></i>Back to Clients
                         </a>
                     </div>
                 </div>
@@ -26,7 +26,7 @@
                     <div class="alert alert-info mb-4">
                         <div class="row">
                             <div class="col-md-4">
-                                <strong><i class="bi bi-credit-card me-1"></i>Identitätsnummer:</strong><br>
+                                <strong><i class="bi bi-credit-card me-1"></i>ID number:</strong><br>
                                 {{ client.identity_number }}
                             </div>
                             <div class="col-md-4">
@@ -34,7 +34,7 @@
                                 {{ client.user.email }}
                             </div>
                             <div class="col-md-4">
-                                <strong><i class="bi bi-calendar me-1"></i>Registriert:</strong><br>
+                                <strong><i class="bi bi-calendar me-1"></i>Joined:</strong><br>
                                 {{ client.user.date_joined|date:"d.m.Y" }}
                             </div>
                         </div>
@@ -48,7 +48,7 @@
                             <div class="col-md-5 border-end pe-md-4">
                                 <fieldset>
                                     <legend class="fs-5 mb-3 text-warning">
-                                        <i class="bi bi-person-circle me-2"></i>Benutzerdaten (Bearbeitbar)
+                                        <i class="bi bi-person-circle me-2"></i>User Details:
                                     </legend>
 
                                     <!-- Form errors for user form -->
@@ -130,11 +130,10 @@
                                 </fieldset>
                             </div>
 
-                            <!-- Client Details Column (Editable) -->
                             <div class="col-md-7 ps-md-4">
                                 <fieldset>
                                     <legend class="fs-5 mb-3 text-warning">
-                                        <i class="bi bi-person-badge me-2"></i>Kundendetails (Bearbeitbar)
+                                        <i class="bi bi-person-badge me-2"></i>Client Details:
                                     </legend>
 
                                     <!-- Form errors summary -->
@@ -296,7 +295,7 @@
                         {% if client_form.errors or user_form.errors %}
                             <div class="alert alert-warning mt-3" role="alert">
                                 <h6 class="alert-heading">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>Bitte korrigieren Sie die folgenden Fehler:
+                                    <i class="bi bi-exclamation-triangle me-2"></i>Please check the following errors:
                                 </h6>
                                 <ul class="mb-0">
                                     {% for field_name, errors in client_form.errors.items %}
@@ -323,19 +322,19 @@
                         <div class="d-flex justify-content-end align-items-center mt-4 gap-2">
                             <!-- Save -->
                             <button type="submit" class="btn btn-warning">
-                                <i class="bi bi-check-circle me-1"></i>Änderungen speichern
+                                <i class="bi bi-check-circle me-1"></i>Save Changes
                             </button>
 
                             <!-- Delete customer (POST) -->
                             <a href="{% url 'deactivate_customer' client.id %}" 
                                 class="btn btn-danger"
                                 onclick="return deactivateClient(event, this.href);">
-                                <i class="bi bi-person-x me-1"></i>Deaktivieren
+                                <i class="bi bi-person-x me-1"></i>Deactivate
                             </a>
 
                             <!-- Cancel -->
                             <a href="{% url 'edit_customers' %}" class="btn btn-outline-secondary">
-                                <i class="bi bi-x-circle me-1"></i>Abbrechen
+                                <i class="bi bi-x-circle me-1"></i>Quit
                             </a>
                         </div>
                     </form>

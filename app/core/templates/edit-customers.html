@@ -6,9 +6,9 @@
 
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-people me-2"></i>Kundenauswahl</h2>
+        <h2><i class="bi bi-people me-2"></i>Choose Client</h2>
         <a href="{% url 'manage' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i>Zurück
+            <i class="bi bi-arrow-left me-1"></i>Back
         </a>
     </div>
 
@@ -21,17 +21,17 @@
                        name="q" 
                        value="{{ search_query }}" 
                        class="form-control" 
-                       placeholder="Nach Identitätsnummer suchen..." 
-                       aria-label="Suche nach Identitätsnummer">
+                       placeholder="Search via ID number..."
+                       aria-label="Search via ID number...">
             </div>
         </div>
         <div class="col-md-4">
             <button type="submit" class="btn btn-primary me-2">
-                <i class="bi bi-search me-1"></i>Suchen
+                <i class="bi bi-search me-1"></i>Search
             </button>
             {% if search_query %}
                 <a href="{% url 'edit_customers' %}" class="btn btn-outline-secondary">
-                    <i class="bi bi-x-circle me-1"></i>Zurücksetzen
+                    <i class="bi bi-x-circle me-1"></i>Reset
                 </a>
             {% endif %}
         </div>
@@ -40,15 +40,15 @@
     {% if search_query %}
         <div class="alert alert-info">
             <i class="bi bi-info-circle me-2"></i>
-            Suchergebnisse für Identitätsnummer: <strong>"{{ search_query }}"</strong>
-            ({{ customers|length }} {% if customers|length == 1 %}Kunde{% else %}Kunden{% endif %} gefunden)
+            Search results: <strong>"{{ search_query }}"</strong>
+            ({{ customers|length }} {% if customers|length == 1 %}Client{% else %}Clients{% endif %} gefunden)
         </div>
     {% endif %}
 
     {% if customers %}
         <div class="card">
             <div class="card-header bg-light">
-                <h5 class="mb-0"><i class="bi bi-list me-2"></i>Kunden</h5>
+                <h5 class="mb-0"><i class="bi bi-list me-2"></i>Clients</h5>
             </div>
             <div class="list-group list-group-flush">
                 {% for customer in customers %}
@@ -68,7 +68,7 @@
                                 <i class="bi bi-envelope me-1"></i>{{ customer.user.email }}
                             </small>
                             <small class="text-primary">
-                                <i class="bi bi-pencil me-1"></i>Bearbeiten
+                                <i class="bi bi-pencil me-1"></i>Modify Customer
                             </small>
                         </div>
                     </a>
@@ -121,8 +121,8 @@
             </nav>
 
             <div class="text-center text-muted mt-2">
-                Seite {{ page_obj.number }} von {{ paginator.num_pages }} 
-                ({{ paginator.count }} {% if paginator.count == 1 %}Kunde{% else %}Kunden{% endif %} insgesamt)
+                Page {{ page_obj.number }} from {{ paginator.num_pages }}
+                ({{ paginator.count }} {% if paginator.count == 1 %}Client{% else %}Clients{% endif %} overall)
             </div>
         {% endif %}
 
@@ -131,17 +131,17 @@
             <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
             <h4 class="text-muted mt-3">
                 {% if search_query %}
-                    Keine Kunden mit Identitätsnummer "{{ search_query }}" gefunden
+                    No clients with ID "{{ search_query }}" found
                 {% else %}
-                    Noch keine Kunden vorhanden
+                    No clients available
                 {% endif %}
             </h4>
             <p class="text-muted">
                 {% if search_query %}
-                    Überprüfen Sie die Identitätsnummer oder 
-                    <a href="{% url 'edit_customers' %}">alle Kunden anzeigen</a>
+                    Check the ID number or
+                    <a href="{% url 'edit_customers' %}">show all clients</a>
                 {% else %}
-                    Geben Sie eine Identitätsnummer in das Suchfeld ein
+                    Give the ID number in the search box
                 {% endif %}
             </p>
         </div>

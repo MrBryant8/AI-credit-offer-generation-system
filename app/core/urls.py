@@ -19,6 +19,11 @@ urlpatterns = [
     path("home/", HomePageView.as_view(), name="home"),
     path("change-password/", CustomPasswordChangeView.as_view(), name="password_change"),
     path("my-offers/", MyOffersView.as_view(), name="my_offers"),
+    path("more-info/", MoreInfoView.as_view(), name="more_info"),
+    path("data-privacy/", DataPrivacyView.as_view(), name="data_privacy"),
+    path("careers/", CarrersView.as_view(), name="careers"),
+    path("contact/", ContactView.as_view(), name="contact"),
+    path("create-email/", write_email, name="create_email"),
     path('offers/<int:pk>/', CreditOfferDetailView.as_view(), name='offer_detail'),
     path('offer/<int:pk>/accept/', AcceptOfferView.as_view(), name='accept_offer'),
     path('offer/<int:pk>/reject/', RejectOfferView.as_view(), name='reject_offer'),
@@ -39,12 +44,5 @@ urlpatterns = [
     path("manage/view-agent-feedback/", AgentFeedbackView.as_view(), name="agent_feedback"),
     path("manage/feedback/<int:pk>/decline/", AgentFeedbackDeclineView.as_view(), name="decline_agent_feedback"),
     path("manage/feedback/<int:pk>/report/", AgentFeedbackReportView.as_view(), name="report_agent_feedback"),
-    path("create-email/", write_email, name="create_email"),
-    path("more-info/", MoreInfoView.as_view(), name="more_info"),
-    path("data-privacy", DataPrivacyView.as_view(), name="data_privacy"),
-
-    path("careers", CarrersView.as_view(), name="careers"),
-
-    path("contact", ContactView.as_view(), name="contact"),
     path('api/', include(router.urls))
 ]

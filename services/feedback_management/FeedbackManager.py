@@ -1,6 +1,10 @@
 from Feedback_REST_Interface import REST
 
 class FeedbackManager:
+
+    """
+    Feedback Manager Class to manage agent feedback related operations.
+    """
     def __init__(self):
         self.rest=REST()
         self.feedback_summary_prompt = """

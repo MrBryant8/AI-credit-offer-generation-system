@@ -1,7 +1,9 @@
 import requests
 
 class REST:
-
+    """
+    REST Interface to access the REST API in the context of client management
+    """
     def __init__(self, base_app="django", rest_api_suffix="api"):
         self.base_url=f"http://{base_app}:8000"
         self.rest_url=f"{self.base_url}/{rest_api_suffix}"
@@ -71,7 +73,4 @@ class REST:
             "email_content": email_content
         }
         response = requests.post(url, json=payload, headers=self.headers, timeout=60)
-        print(response.text)
-        print(response.status_code)
-        print(response.content)
         return 200 <= response.status_code < 300

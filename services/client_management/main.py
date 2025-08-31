@@ -3,6 +3,9 @@ import os
 
 RISK_THRESHOLD = float(os.environ.get("RISK_THRESHOLD", 0.25))
 def run_pipeline():
+    """
+    Cron Job to schedule Client management pipeline.
+    """
     cm = ClientManager()
     new_clients = cm.check_for_new_clients()
     for client in new_clients:
@@ -14,7 +17,6 @@ def run_pipeline():
         offer_created = cm.create_offer(client)
         if offer_created:
             cm.rest.add_risk_score_to_customer(client.get("id"), low_risk_probability)
-
 
 
 run_pipeline()

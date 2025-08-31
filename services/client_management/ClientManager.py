@@ -4,6 +4,9 @@ import pandas as pd
 from Client_REST_Interface import REST
 
 class ClientManager:
+    """
+    Client Manager Class to manage clients, predict risk score and generate offers.
+    """
     def __init__(self):
         self.rest=REST()
     
@@ -39,12 +42,12 @@ class ClientManager:
         }])
         return df_new
 
-    def generate_additional_features(self, client_age, client_loan_duration, client_loan_ammount):
-        credit_per_month = client_loan_ammount/client_loan_duration
+    def generate_additional_features(self, client_age, client_loan_duration, client_loan_amount):
+        credit_per_month = client_loan_amount / client_loan_duration
 
         age_group = self.calculate_age_group(client_age)
 
-        credit_amount_category = self.calculate_credit_amount_category(client_loan_ammount)
+        credit_amount_category = self.calculate_credit_amount_category(client_loan_amount)
 
         duration_category = self.calculate_duration_category(client_loan_duration)
         

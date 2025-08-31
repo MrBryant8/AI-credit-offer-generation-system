@@ -2,6 +2,27 @@ from django.db import models
 from .users import User
 
 class Client(models.Model):
+    """Model to store client information for credit risk assessment.
+
+        This model contains personal, financial, and credit-related information
+        used to evaluate loan applications and calculate risk scores.
+
+        Attributes:
+            - id: Auto-incrementing primary key for the client.
+            - user: One-to-one relationship with User model (optional).
+            - identity_number: Unique identifier for the client (15 characters max).
+            - age: Client's age in years (minimum 18).
+            - sex: Client's gender (male/female).
+            - job: Employment skill level from jobless to high-skill.
+            - housing: Housing situation (own/rent/free).
+            - saving_account: Savings account balance category.
+            - checking_account: Checking account balance category.
+            - credit_amount: Requested loan amount.
+            - duration: Loan duration in months (default 12).
+            - purpose: Purpose of the loan (car, education, business, etc.).
+            - risk_score: Calculated credit risk score (optional).
+            - is_active: Whether the client record is currently active.
+        """
 
     class Job(models.IntegerChoices):
         JOBLESS = 0, "jobless"

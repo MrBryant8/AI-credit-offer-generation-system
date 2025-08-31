@@ -14,7 +14,7 @@ from django.utils.safestring import mark_safe
 from django.conf import settings
 from rest_framework.utils import json
 from ..forms import *
-from ..services.custom_api import *
+from ..utils.utils import *
 from django.core.paginator import Paginator
 from .agents.crew import EmailCrew
 
@@ -28,59 +28,27 @@ class HomePageView(View):
     def get(self, request):
         return render(request, 'home.html')
 
+class MoreInfoView(View):
+    template_name = "footer/info.html"
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
 
-class CustomPasswordChangeView(PasswordChangeView, LoginRequiredMixin):
-    form_class = CustomPasswordChangeForm
-    template_name = 'registration/password_change_form.html'
-    success_url = reverse_lazy('home')
+class ContactView(View):
+    template_name = "footer/contact.html"
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
 
-    def form_valid(self, form):
-        user = form.save()
 
-        subject = "SmartCredit - password change"
-        body = f"Hello {user.get_full_name()},\n\nYour password was successfully changed.\n\nBest regards, Smart Credit Team"
+class CarrersView(View):
+    template_name = "footer/careers.html"
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
 
-        send_email(user.email, subject, body)
-        
-        # Keep user logged in
-        update_session_auth_hash(self.request, user)
-        msg.success(self.request, 'Your password was successfully updated!')
-        
-        return super().form_valid(form)
 
-@csrf_exempt
-def write_email(request):
-    
-    if request.content_type != 'application/json':
-        return JsonResponse({
-            'error': 'Content-Type must be application/json'
-        }, status=400)
-    
-    if request.method == "POST":
-        data = {}
-        try:
-                data = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse({
-                'error': 'Invalid JSON in request body'
-            }, status=400)
-        
-        inputs = {
-            "client_name": data.get("name"),
-            "client_age": data.get("age"),
-            "client_sex": data.get("sex"),
-            "loan_purpose": data.get("loan_purpose"),
-            "loan_amount": data.get("loan_amount"),
-            "loan_duration": data.get("loan_duration"),
-            "loan_type_description": data.get("loan_description"),
-            "more_details_link": data.get("details_link"),
-            "bank_address": getattr(settings, 'BANK_DEFAULT_ADRESS'),
-            "bank_phone_number": getattr(settings, 'BANK_DEFAULT_PHONE_NUMBER')
-            }
-
-        result = EmailCrew().crew().kickoff(inputs=inputs).json
-
-        return JsonResponse(result, status=200, safe=False)
+class DataPrivacyView(View):
+    template_name = "footer/privacy.html"
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
 
 
 class LoginPageView(FormView):
@@ -129,6 +97,25 @@ class SignUpPageView(FormView):
                 error_message = str(e)
 
         return render(request, 'sign-up.html', {'error_message': error_message})
+
+
+class CustomPasswordChangeView(PasswordChangeView, LoginRequiredMixin):
+    form_class = CustomPasswordChangeForm
+    template_name = 'registration/password_change_form.html'
+    success_url = reverse_lazy('home')
+
+    def form_valid(self, form):
+        user = form.save()
+
+        subject = "SmartCredit - password change"
+        body = f"Hello {user.get_full_name()},\n\nYour password was successfully changed.\n\nBest regards, Smart Credit Team"
+
+        send_email(user.email, subject, body)
+
+        update_session_auth_hash(self.request, user)
+        msg.success(self.request, 'Your password was successfully updated!')
+
+        return super().form_valid(form)
 
 
 class MyOffersView(LoginRequiredMixin, View):
@@ -203,7 +190,6 @@ class ManageView(LoginRequiredMixin, UserPassesTestMixin, View):
         return getattr(self.request.user, 'is_moderator', False)
 
     def handle_no_permission(self):
-        # Optional: render a custom 403 template or return a basic forbidden response
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     def get(self, request):
@@ -217,7 +203,6 @@ class ModeratorOffersView(LoginRequiredMixin, UserPassesTestMixin, View):
         return getattr(self.request.user, 'is_moderator', False)
 
     def handle_no_permission(self):
-        # Optional: render a custom 403 template or return a basic forbidden response
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     def get(self, request):
@@ -241,7 +226,6 @@ class EditOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return self.request.user.is_moderator
 
     def handle_no_permission(self):
-        # Optionally redirect or raise 403
         if self.request.user.is_authenticated:
             return HttpResponseForbidden("You do not have the authorization to modify this offer.")
         return super().handle_no_permission()
@@ -254,7 +238,6 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
         return self.request.user.is_moderator
 
     def handle_no_permission(self):
-        # Optionally redirect or raise 403
         if self.request.user.is_authenticated:
             return HttpResponseForbidden("You do not have the authorization to modify this offer.")
         return super().handle_no_permission()
@@ -262,7 +245,6 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
 
-       # Check if email content exists
         if not offer.email_content:
             msg.error(request, "No email generated for this offer.")
             return redirect('offer_detail', pk=pk)
@@ -369,7 +351,6 @@ class EditCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
         return super().handle_no_permission()
 
     def get(self, request, pk):
-        # Get the client instance to edit
         client = get_object_or_404(Client, pk=pk)
         
         client_form = EditClientForm(instance=client)
@@ -383,28 +364,23 @@ class EditCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
         })
 
     def post(self, request, pk):
-        # Get the client instance to update
         client = get_object_or_404(Client, pk=pk)
-        
-        # Create both forms with POST data and existing instances
+
         client_form = EditClientForm(request.POST, instance=client)
         user_form = UserManageForm(request.POST, instance=client.user)
         
         if client_form.is_valid() and user_form.is_valid():
-            # Save user information first
             user = user_form.save()
-            
-            # Save client information
+
             client = client_form.save(commit=False)
-            client.user = user  # Ensure the relationship is maintained
+            client.user = user
             client.risk_score = None
             CreditOffer.objects.filter(client=client).update(is_active=False)
             client.save()
             
             msg.success(request, f"Client {user.first_name} {user.last_name} successfully updated.")
             return redirect('edit_customers')
-        
-        # If forms are invalid, re-render page with errors
+
         return render(request, self.template_name, {
             'client_form': client_form,
             'user_form': user_form,
@@ -412,8 +388,17 @@ class EditCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
             'is_editing': True,
         })
     
-class DeactivateCustomerView(View):
+class DeactivateCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
     http_method_names = ["post"]
+    login_url = "/login"
+
+    def test_func(self):
+        return self.request.user.is_moderator
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("You do not have the authorization to modify this client.")
+        return super().handle_no_permission()
 
     def post(self, request, pk, *args, **kwargs):
         customer = get_object_or_404(Client, pk=pk)
@@ -471,19 +456,36 @@ class AgentFeedbackView(LoginRequiredMixin, UserPassesTestMixin, View):
             }
         return render(request, "agent-feedback.html", context)
     
-class AgentFeedbackDeclineView(View):
+class AgentFeedbackDeclineView(LoginRequiredMixin, UserPassesTestMixin, View):
     http_method_names = ["post"]
+    login_url = "/login"
+
+    def test_func(self):
+        return self.request.user.is_moderator
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("You do not have the authorization to modify this feedback object.")
+        return super().handle_no_permission()
 
     def post(self, request, pk, *args, **kwargs):
         fb = get_object_or_404(AgentFeedback, pk=pk)
         fb.is_reviewed = True
         fb.save(update_fields=["is_reviewed"])
         msg.success(request, "Agent Feedback declined.")
-        # Redirect back to detail or to a manage page
         return redirect(reverse('manage'))
     
-class AgentFeedbackReportView(View):
+class AgentFeedbackReportView(LoginRequiredMixin, UserPassesTestMixin, View):
     http_method_names = ["post"]
+    login_url = "/login"
+
+    def test_func(self):
+        return self.request.user.is_moderator
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("You do not have the authorization to modify this feedback object.")
+        return super().handle_no_permission()
 
     def post(self, request, pk, *args, **kwargs):
         fb = get_object_or_404(AgentFeedback, pk=pk)
@@ -500,8 +502,6 @@ class AcceptOfferView(LoginRequiredMixin, View):
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
 
-        # Optional: check that user belongs to this offer (e.g., offer.client.user == request.user)
-        print(offer.client.user)
         if not offer.client or offer.client.user != request.user:
             msg.error(request, "You do not have the authorization to accept the offer.")
             return redirect('offer_detail', pk=pk)
@@ -510,18 +510,13 @@ class AcceptOfferView(LoginRequiredMixin, View):
             msg.info(request, "This offer is already accepted.")
         else:
             offer.is_accepted = True
+            if offer.is_draft:
+                offer.is_draft = False
             offer.save()
             msg.success(request, "You have accepted this offer.")
 
         return redirect('offer_detail', pk=pk)
 
-    def test_func(self):
-        return not self.request.user.is_moderator
-
-    def handle_no_permission(self):
-        if self.request.user.is_authenticated:
-            return HttpResponseForbidden("You do not have the authorization to modify this offer.")
-        return super().handle_no_permission()
 
 
 class RejectOfferView(LoginRequiredMixin, View):
@@ -530,7 +525,6 @@ class RejectOfferView(LoginRequiredMixin, View):
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
 
-        # Optional: check that user belongs to this offer
         if not offer.client or offer.client.user != request.user:
             msg.error(request, "You do not have the authorization to reject the offer.")
             return redirect('offer_detail', pk=pk)
@@ -539,18 +533,12 @@ class RejectOfferView(LoginRequiredMixin, View):
             msg.info(request, "This offer is already rejected.")
         else:
             offer.is_accepted = False
+            if offer.is_draft:
+                offer.is_draft = False
             offer.save()
             msg.success(request, "You have rejected this offer.")
 
         return redirect('offer_detail', pk=pk)
-
-    def test_func(self):
-        return not self.request.user.is_moderator
-
-    def handle_no_permission(self):
-        if self.request.user.is_authenticated:
-            return HttpResponseForbidden("You do not have the authorization to modify this offer.")
-        return super().handle_no_permission()
 
 
 class ChatView(LoginRequiredMixin, View):
@@ -618,42 +606,18 @@ class ChatView(LoginRequiredMixin, View):
         return redirect('chat_page', pk=pk)
 
 
-@csrf_protect
-def save_and_reset_chat(request, offer_id):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        chat_id = data.get("chat_id")
-        messages_list = data.get("message_history")
-        save_messages(chat_id, messages_list)
-        if f'chat_history_{chat_id}' in request.session:
-            del request.session[f'chat_history_{chat_id}']
-            print("chat_history removed")
-        if 'chat_id' in request.session:
-            del request.session[f'chat_id']
-            print("chat_id removed")
 
-        return JsonResponse({
-            "redirect_url": reverse('chat_page', kwargs={"pk": offer_id})
-        }, status=200)
-
-@csrf_protect
-def reset_chat(request, offer_id):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        chat_id = data.get("chat_id")
-
-        if f'chat_history_{chat_id}' in request.session:
-            del request.session[f'chat_history_{chat_id}']
-            print("chat_history removed")
-
-        return JsonResponse({
-            "redirect_url": reverse('chat_page', kwargs={"pk": offer_id})
-        }, status=200)
-
-
-class OfferFinderView(View, LoginRequiredMixin):
+class OfferFinderView(View, LoginRequiredMixin, UserPassesTestMixin):
     login_url = "/login"
-    template_name = "offer_finder.html"
+    template_name = "offer-finder.html"
+
+    def test_func(self):
+        return self.request.user.is_moderator
+
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden("You do not have the authorization to view this function.")
+        return super().handle_no_permission()
 
     def get(self, request, *args, **kwargs):
         offer_id = request.GET.get("offer_id")
@@ -672,26 +636,79 @@ class OfferFinderView(View, LoginRequiredMixin):
 
         return redirect("offer_detail", pk=pk)
 
-class MoreInfoView(View):
-    template_name = "footer/info.html"
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
 
-class ContactView(View):
-    template_name = "footer/contact.html"
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+@csrf_exempt
+def write_email(request):
+    """
+    View to handle email generation and agent invocation.
+    """
+    if request.content_type != 'application/json':
+        return JsonResponse({
+            'error': 'Content-Type must be application/json'
+        }, status=400)
+
+    if request.method == "POST":
+        data = {}
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'error': 'Invalid JSON in request body'
+            }, status=400)
+
+        inputs = {
+            "client_name": data.get("name"),
+            "client_age": data.get("age"),
+            "client_sex": data.get("sex"),
+            "loan_purpose": data.get("loan_purpose"),
+            "loan_amount": data.get("loan_amount"),
+            "loan_duration": data.get("loan_duration"),
+            "loan_type_description": data.get("loan_description"),
+            "more_details_link": data.get("details_link"),
+            "bank_address": getattr(settings, 'BANK_DEFAULT_ADRESS'),
+            "bank_phone_number": getattr(settings, 'BANK_DEFAULT_PHONE_NUMBER')
+        }
+
+        result = EmailCrew().crew().kickoff(inputs=inputs).json
+
+        return JsonResponse(result, status=200, safe=False)
 
 
-class CarrersView(View):
-    template_name = "footer/careers.html"
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+@csrf_protect
+def save_and_reset_chat(request, offer_id):
+    """
+    View to reset the chat while saving it.
+    """
+    if request.method == "POST":
+        data = json.loads(request.body)
+        chat_id = data.get("chat_id")
+        messages_list = data.get("message_history")
+        save_messages(chat_id, messages_list)
+        if f'chat_history_{chat_id}' in request.session:
+            del request.session[f'chat_history_{chat_id}']
+            print("chat_history removed")
+        if 'chat_id' in request.session:
+            del request.session[f'chat_id']
+            print("chat_id removed")
 
+        return JsonResponse({
+            "redirect_url": reverse('chat_page', kwargs={"pk": offer_id})
+        }, status=200)
 
-class DataPrivacyView(View):
-    template_name = "footer/privacy.html"
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
+@csrf_protect
+def reset_chat(request, offer_id):
+    """
+    View to reset the chat without saving it.
+    """
+    if request.method == "POST":
+        data = json.loads(request.body)
+        chat_id = data.get("chat_id")
 
+        if f'chat_history_{chat_id}' in request.session:
+            del request.session[f'chat_history_{chat_id}']
+            print("chat_history removed")
+
+        return JsonResponse({
+            "redirect_url": reverse('chat_page', kwargs={"pk": offer_id})
+        }, status=200)
 

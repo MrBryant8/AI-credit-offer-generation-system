@@ -1,2 +1,2 @@
-from .api import *
-from .general import *
+from .rest_api import *
+from .general_view_classes import *

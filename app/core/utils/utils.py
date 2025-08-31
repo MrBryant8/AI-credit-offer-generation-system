@@ -17,10 +17,13 @@ from ..models import *
 
 
 def add_new_user(first_name, last_name, email, password):
+    """
+    Adds a new user + client to the database.
+    """
     User = get_user_model()
 
     if User.objects.filter(email=email).exists():
-        error_message = "Ein Nutzer mit dieser E-Mail existiert bereits."
+        error_message = "A user with that email already exists."
         raise IntegrityError(error_message)
     else:
         hashed_password = make_password(password)
@@ -43,11 +46,18 @@ def fetch_credit_offers_per_user(user_id):
 
 
 def deactivate_old_credit_offers():
+    """
+    Deactivates credit offers, which are older than 1 week.
+    """
     expiry_cutoff = timezone.now() - timedelta(weeks=1)
     CreditOffer.objects.filter(is_active=True, created_at__lt=expiry_cutoff).update(is_active=False)
 
 
 def llm_generate_reply(message_history: list):
+
+    """
+    Utils function to handle LLM calls and chat integrity.
+    """
     model_url = os.getenv("LLM_URL")
     model_name = os.getenv("LLM_NAME")
 
@@ -83,7 +93,7 @@ def create_chat(credit_offer, user):
 
 def rephraze_offer(offer):
     """
-       Given a CreditOffer ID, returns all relevant relational data
+       Given a CreditOffer, returns all relevant relational data
        from CreditOffer, Loan, and Client for context building in an LLM chatbot.
     """
     RISK_THRESHOLD = getattr(settings, "RISK_THRESHOLD")
@@ -117,6 +127,9 @@ def rephraze_offer(offer):
 
 
 def save_messages(chat_id, messages_list):
+    """
+    Save messages in JSON.
+    """
     messages_redacted = html.unescape(messages_list)
     messages_redacted_json =(messages_redacted.
                              replace("'role'", '"role"')
@@ -144,6 +157,10 @@ def get_high_risk_clients(threshold):
 
 
 def send_email(receiver_email, subject, email_body, format="plain", encoding="utf-8"):
+
+    """
+    Function to send offers to users via E-Mail ( SMTP ).
+    """
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@smartcredit.com')
     host_user = getattr(settings, 'EMAIL_HOST_USER')
     host_password = getattr(settings, 'EMAIL_HOST_PASSWORD')

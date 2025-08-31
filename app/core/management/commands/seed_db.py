@@ -5,7 +5,7 @@ import random
 
 
 class Command(BaseCommand):
-    help = 'Seed database with users, clients, loans, and credit offers'
+    help = 'Seed database with users, clients, and loans'
 
     def handle(self, *args, **options):
         User = get_user_model()
@@ -187,31 +187,6 @@ class Command(BaseCommand):
                 self.stdout.write(f"Client already exists (User: {cd['user_obj'].email if cd['user_obj'] else 'None'}, Age: {cd['age']})")
             clients.append(client)
 
-        # 4. Create 7 credit offers; ensure one client has multiple offers
-        # offers_data = [
-        #     {"client": clients[0], "loan": loans[0], "email_content": "Offer 1 email content", "moderator_feedback": "Feedback 1" },
-        #     {"client": clients[0], "loan": loans[1], "email_content": "Offer 2 email content", "moderator_feedback": "Feedback 2" },
-        #     {"client": clients[1], "loan": loans[2], "email_content": "Offer 3 email content", "moderator_feedback": "Feedback 3" },
-        #     {"client": clients[2], "loan": loans[3], "email_content": "Offer 4 email content", "moderator_feedback": "Feedback 4" },
-        #     {"client": clients[3], "loan": loans[4], "email_content": "Offer 5 email content", "moderator_feedback": "Feedback 5" },
-        #     {"client": clients[4], "loan": loans[0], "email_content": "Offer 6 email content", "moderator_feedback": "Feedback 6" },
-        #     {"client": clients[4], "loan": loans[1], "email_content": "Offer 7 email content", "moderator_feedback": "Feedback 7" }
-        # ]
-
-        # for idx, od in enumerate(offers_data, start=1):
-        #     offer,created = CreditOffer.objects.get_or_create(
-        #         email_content=od["email_content"],
-        #         defaults={
-        #             "client": od["client"],
-        #             "loan_type": od["loan"],
-        #             "moderator_feedback": od["moderator_feedback"]
-        #         }
-        #     )
-        #     if created:
-        #         self.stdout.write(self.style.SUCCESS(f"Created Offer #{idx} for Client #{od['client'].id}"))
-        #     else:
-        #         self.stdout.write(
-        #             f"Offer already exists (User: {od['client'].id}, Loan Type: {od['loan'].description})")
 
         self.stdout.write(self.style.SUCCESS("Database seeding completed!"))
 

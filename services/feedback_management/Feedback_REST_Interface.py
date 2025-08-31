@@ -1,7 +1,9 @@
 import requests
 
 class REST:
-
+    """
+    REST Interface to access the REST API in the context of agent feedback management
+    """
     def __init__(self, base_app="django", rest_api_suffix="api"):
         self.base_url=f"http://{base_app}:8000"
         self.rest_url=f"{self.base_url}/{rest_api_suffix}"

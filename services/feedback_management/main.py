@@ -13,9 +13,10 @@ def gemini_ask(client: genai.Client, question, model="gemini-2.0-flash-lite"):
     )
 
 
-
 def run_pipeline():
-
+    """
+    Cron Job to schedule feedback management pipeline.
+    """
     with open('/run/secrets/gemini_api_key', 'r') as f:
         os.environ["GEMINI_API_KEY"] = f.read().strip()
        

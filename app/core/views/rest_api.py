@@ -2,6 +2,10 @@ from rest_framework import viewsets
 from ..models import *
 from ..serializers import *
 
+
+"""
+    REST Interface for the Models in the context if the Project.
+"""
 class ClientViewSet(viewsets.ModelViewSet):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
