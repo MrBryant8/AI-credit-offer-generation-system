@@ -32,7 +32,6 @@
             </dd>
             {% endif %}
 
-            {% if user.is_authenticated and user.is_moderator and user.id != offer.client.user.id %}
                 <dt class="col-sm-5">Offer Amount Requested</dt>
                 <dd class="col-sm-7">{{ offer.client.credit_amount }} €</dd>
 
@@ -42,6 +41,7 @@
                 <dt class="col-sm-5">Offer Purpose</dt>
                 <dd class="col-sm-7">{{ offer.client.purpose }}</dd>
 
+            {% if user.is_authenticated and user.is_moderator and user.id != offer.client.user.id %}
                 <dt class="col-sm-5">Client Age</dt>
                 <dd class="col-sm-7">{{ offer.client.age }}</dd>
 
