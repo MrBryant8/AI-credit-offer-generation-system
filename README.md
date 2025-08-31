@@ -12,3 +12,5 @@ Manually change
   - in docker-compose.yml change:
     - frontend service:
       - the dockerfile to Dockerfile
+     
+Add secrets folder in the root and populate with the passwords/keys.
