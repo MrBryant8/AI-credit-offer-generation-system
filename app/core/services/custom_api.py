@@ -11,6 +11,7 @@ from django.conf import settings
 import requests
 import os
 import html
+import markdown
 
 from ..models import *
 
@@ -175,51 +176,4 @@ def redact_markdown_content(email_content: str):
     if not email_content:
         return ""
     
-    import html
-    import re
-    
-    # First, find all blocks containing lines starting with "* "
-    def block_replacer(match):
-        block = match.group(0)
-        # Replace each bullet line with HTML <li>
-        items = re.findall(r'^\* (.+)', block, re.MULTILINE)
-        lis = ''.join(f'<li>{item}</li>' for item in items)
-        return f'<ul>{lis}</ul>'
-
-    escaped_text = html.escape(email_content)
-    
-    # Step 1: Convert markdown links [text](url) to HTML links
-    escaped_text = re.sub(
-        r'\[([^\]]+)\]\((https?://[^\)]+)\)', 
-        r'<a href="\2">\1</a>', 
-        escaped_text
-    )
-    
-    # Step 2: Convert plain URLs to clickable links
-    # Match URLs that are not already in <a> tags
-    escaped_text = re.sub(
-        r'(?<!href=")(?<!href=\')\b(https?://[^\s<>"\']+)',
-        r'<a href="\1">\1</a>',
-        escaped_text
-    )
-    
-    # Step 3: Convert **bold** to <strong>
-    escaped_text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', escaped_text)
-
-    # Step 4: Convert bullet lists
-    escaped_text = re.sub(r'(?:^\* .+\n?)+', block_replacer, escaped_text, flags=re.MULTILINE)
-    
-    # Step 5: Convert numbered lists (1. 2. 3. etc.)
-    def numbered_block_replacer(match):
-        block = match.group(0)
-        # Replace each numbered line with HTML <li>
-        items = re.findall(r'^\d+\.\s+(.+)', block, re.MULTILINE)
-        lis = ''.join(f'<li>{item}</li>' for item in items)
-        return f'<ol>{lis}</ol>'
-    
-    escaped_text = re.sub(r'(?:^\d+\.\s+.+\n?)+', numbered_block_replacer, escaped_text, flags=re.MULTILINE)
-    
-    # Step 6: Convert line breaks to <br>
-    escaped_text = escaped_text.replace('\\n', '<br>')
-    
-    return escaped_text
+    return markdown.markdown(email_content)
