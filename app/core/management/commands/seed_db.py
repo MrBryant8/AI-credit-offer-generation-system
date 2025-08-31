@@ -43,35 +43,35 @@ class Command(BaseCommand):
         # 2. Create 5 loan types with descriptions
         loan_types_data = [
             {
-                "interest": 0.03,
+                "interest": 0.06,
                 "amount_start": 1000,
                 "amount_end": 5000,
                 "duration": 12,
                 "description": "Personal Loan - Small. Ideal for small expenses, this loan offers flexible repayment terms suited for short-term needs."
             },
             {
-                "interest": 0.025,
+                "interest": 0.05,
                 "amount_start": 5000,
                 "amount_end": 15000,
                 "duration": 24,
                 "description": "Personal Loan - Medium. Perfect for medium-sized purchases or consolidations, providing competitive interest rates and manageable monthly payments."
             },
             {
-                "interest": 0.02,
+                "interest": 0.04,
                 "amount_start": 15000,
                 "amount_end": 50000,
                 "duration": 36,
                 "description": "Personal Loan - Large. Designed for major expenses such as home improvements or education, with longer terms to ease financial planning."
             },
             {
-                "interest": 0.015,
+                "interest": 0.03,
                 "amount_start": 50000,
                 "amount_end": 150000,
                 "duration": 60,
                 "description": "Home Loan. Tailored for purchasing or refinancing your home, offering low-interest rates with extended repayment periods."
             },
             {
-                "interest": 0.035,
+                "interest": 0.07,
                 "amount_start": 0,
                 "amount_end": 1000,
                 "duration": 6,
@@ -120,8 +120,7 @@ class Command(BaseCommand):
         "checking_account": Client.CheckingAccount.MODERATE,
         "credit_amount": 10000,
         "duration": 24,
-        "purpose": Client.Purpose.BUSINESS,
-        "risk_score": 30,
+        "purpose": Client.Purpose.BUSINESS
     },
     {
         "user_obj": created_users[2],
@@ -134,8 +133,7 @@ class Command(BaseCommand):
         "checking_account": Client.CheckingAccount.UNKNOWN,
         "credit_amount": 400,
         "duration": 6,
-        "purpose": Client.Purpose.EDUCATION,
-        "risk_score": 75,
+        "purpose": Client.Purpose.EDUCATION
     },
     {
         "user_obj": created_users[3],

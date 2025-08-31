@@ -25,7 +25,7 @@ def run_pipeline():
     print(f"List of feedbacks: {feedback_list}")
     active_agent_feedback_count = feedback_manager.get_current_agent_feedback_count()
 
-    if len(feedback_list) < 5 or active_agent_feedback_count != 0:
+    if len(feedback_list) < 3 or active_agent_feedback_count != 0:
         print("No need to update the agent task description. Insufficient feedback")
         return
 
@@ -39,7 +39,7 @@ def run_pipeline():
     if reply:
         print("Valid response taken!")
         feedback_manager.rest.change_agent_feedback(reply)
-        # feedback_manager.remove_moderator_feedback(feedback_list=feedback_list_full)
+        feedback_manager.remove_moderator_feedback(feedback_list=feedback_list_full)
     
 
 run_pipeline()

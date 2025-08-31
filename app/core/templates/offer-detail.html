@@ -14,7 +14,7 @@
         </div>
       {% endif %}
 
-      {% if offer.client.id == user.id or user.is_moderator %}
+      {% if offer.client.user.id == user.id or user.is_moderator %}
       <div class="card shadow-sm">
         <div class="card-header bg-primary text-white text-center">
           <h3 class="mb-0">Credit Offer Details - Offer #{{ offer.id }}</h3>
@@ -22,7 +22,7 @@
 
         <div class="card-body">
           <dl class="row gy-2">
-            {% if user.is_authenticated and user.is_moderator %}
+            {% if user.is_authenticated and user.is_moderator and user.id != offer.client.user.id %}
             <dt class="col-sm-5">User</dt>
             <dd class="col-sm-7 d-flex align-items-center">
               <span class="text-break flex-grow-1">{{ offer.client.user.email }}</span>
@@ -32,7 +32,7 @@
             </dd>
             {% endif %}
 
-            {% if user.is_authenticated and user.is_moderator %}
+            {% if user.is_authenticated and user.is_moderator and user.id != offer.client.user.id %}
                 <dt class="col-sm-5">Offer Amount Requested</dt>
                 <dd class="col-sm-7">{{ offer.client.credit_amount }} €</dd>
 
@@ -90,19 +90,15 @@
             <dt class="col-sm-5">Created on</dt>
             <dd class="col-sm-7">{{ offer.created_at|date:"d.m.Y" }}</dd>
 
-            {% if user.is_authenticated and user.is_moderator %}
+            {% if user.is_authenticated and user.is_moderator and user.id != offer.client.user.id%}
             <dt class="col-sm-5">Email Subject</dt>
             <dd class="col-sm-7">{{ offer.email_subject }}</dd>
-            {% endif %}
 
-            {% if user.is_authenticated and user.is_moderator %}
             <dt class="col-sm-5">E-Mail Content</dt>
             <dd class="col-sm-7">
               <pre class="bg-light p-2 rounded text-break mb-0" style="white-space: pre-wrap;">{{ offer.email_content }}</pre>
             </dd>
-            {% endif %}
-            
-            {% if user.is_authenticated and user.is_moderator %}
+
             <dt class="col-sm-5">Moderator Comments</dt>
             <dd class="col-sm-7">{{ offer.moderator_feedback|linebreaksbr }}</dd>
             {% endif %}
@@ -128,7 +124,8 @@
           {% else %}
             <a href="{% url 'moderator_offers' %}" class="btn btn-secondary">Back to offers overview</a>
           {% endif %}
-          {% if user.is_authenticated and user.is_moderator %}
+
+          {% if user.is_authenticated and user.is_moderator and user.id != offer.client.user.id %}
           <form method="post" action="{% url 'send_offer_email' offer.id %}" class="d-inline">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary">Send Email</button>
@@ -149,6 +146,7 @@
             </form>
             {% endif %}
           {% endif %}
+
         </div>
       </div>
       {% else %}
