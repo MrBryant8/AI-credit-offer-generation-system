@@ -37,14 +37,14 @@ class CustomPasswordChangeView(PasswordChangeView, LoginRequiredMixin):
     def form_valid(self, form):
         user = form.save()
 
-        subject = "SmartCredit - Passwort geändert"
-        body = f"Hallo {user.get_full_name()},\n\nIhr Passwort wurde erfolgreich geändert.\n\nBest regards, Smart Credit Team"
+        subject = "SmartCredit - password change"
+        body = f"Hello {user.get_full_name()},\n\nYour password was successfully changed.\n\nBest regards, Smart Credit Team"
 
         send_email(user.email, subject, body)
         
         # Keep user logged in
         update_session_auth_hash(self.request, user)
-        msg.success(self.request, 'Ihr Passwort wurde erfolgreich geändert!')
+        msg.success(self.request, 'Your password was successfully updated!')
         
         return super().form_valid(form)
 
@@ -74,8 +74,8 @@ def write_email(request):
             "loan_duration": data.get("loan_duration"),
             "loan_type_description": data.get("loan_description"),
             "more_details_link": data.get("details_link"),
-            "bank_address": "ul. Kliment Ohridski, 18, Sofia",
-            "bank_phone_number": "0871111111"
+            "bank_address": getattr(settings, 'BANK_DEFAULT_ADRESS'),
+            "bank_phone_number": getattr(settings, 'BANK_DEFAULT_PHONE_NUMBER')
             }
 
         result = EmailCrew().crew().kickoff(inputs=inputs).json
@@ -95,11 +95,11 @@ class LoginPageView(FormView):
             password = form.cleaned_data['password']
             user = authenticate(email=email, password=password)
 
-            if user:
+            if user and user.is_active:
                 login(request, user)
                 return redirect('/home')
             else:
-                error_message = 'Invalid email or password'
+                error_message = 'Invalid user.'
 
         return render(request, 'login.html', {'error_message': error_message})
 
@@ -222,7 +222,7 @@ class ModeratorOffersView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def get(self, request):
         deactivate_old_credit_offers()
-        credit_offers = CreditOffer.objects.filter(is_draft=True)
+        credit_offers = CreditOffer.objects.filter(is_draft=True).exclude(client_id=request.user.id)
         return render(request, 'suggested-offers.html', {'credit_offers': credit_offers})
 
 
@@ -243,7 +243,7 @@ class EditOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def handle_no_permission(self):
         # Optionally redirect or raise 403
         if self.request.user.is_authenticated:
-            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
+            return HttpResponseForbidden("You do not have the authorization to modify this offer.")
         return super().handle_no_permission()
 
 
@@ -256,7 +256,7 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
     def handle_no_permission(self):
         # Optionally redirect or raise 403
         if self.request.user.is_authenticated:
-            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
+            return HttpResponseForbidden("You do not have the authorization to modify this offer.")
         return super().handle_no_permission()
 
     def post(self, request, pk):
@@ -264,7 +264,7 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
 
        # Check if email content exists
         if not offer.email_content:
-            msg.error(request, "Keine E-Mail-Inhalte für dieses Angebot verfügbar.")
+            msg.error(request, "No email generated for this offer.")
             return redirect('offer_detail', pk=pk)
  
         email_content_redacted = redact_markdown_content(offer.email_content)
@@ -276,11 +276,11 @@ class SendOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, View):
             offer.is_active = True
             offer.save()
 
-            msg.success(request, f"E-Mail für Angebot #{offer.id} wurde erfolgreich versandt.")
+            msg.success(request, f"E-Mail for offer #{offer.id} sent successfully.")
 
         except Exception as e:
             print("FAILURE")
-            msg.error(request, f"Fehler beim Versenden der E-Mail: {str(e)}")
+            msg.error(request, f"Error while sending the email: {str(e)}")
         
         return redirect('offer_detail', pk=pk)
     
@@ -308,9 +308,9 @@ class AddCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
             client = client_form.save(commit=False)
             client.user = user
             client.save()
-            msg.success(request, "Kunde und Benutzer wurden erfolgreich erstellt.")
-            return redirect('manage')  # Adjust to your desired URL name
-        # If forms are invalid, re-render page with errors
+            msg.success(request, "User and client added successfully.")
+            return redirect('manage')
+
         return render(request, self.template_name, {
             'user_form': user_form,
             'client_form': client_form,
@@ -321,7 +321,7 @@ class AddCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def handle_no_permission(self):
         if self.request.user.is_authenticated:
-            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
+            return HttpResponseForbidden("You do not have the authorization to modify this offer.")
         return super().handle_no_permission()
 
 class EditCustomersView(LoginRequiredMixin, UserPassesTestMixin, ListView):
@@ -352,7 +352,7 @@ class EditCustomersView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     
     def handle_no_permission(self):
         if self.request.user.is_authenticated:
-            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
+            return HttpResponseForbidden("You do not have the authorization to modify this offer.")
         return super().handle_no_permission()
 
     
@@ -365,7 +365,7 @@ class EditCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def handle_no_permission(self):
         if self.request.user.is_authenticated:
-            return HttpResponseForbidden("Sie haben keine Berechtigung, diesen Kunden zu bearbeiten.")
+            return HttpResponseForbidden("You do not have the authorization to modify this user.")
         return super().handle_no_permission()
 
     def get(self, request, pk):
@@ -401,7 +401,7 @@ class EditCustomerView(LoginRequiredMixin, UserPassesTestMixin, View):
             CreditOffer.objects.filter(client=client).update(is_active=False)
             client.save()
             
-            msg.success(request, f"Kunde {user.first_name} {user.last_name} wurde erfolgreich aktualisiert.")
+            msg.success(request, f"Client {user.first_name} {user.last_name} successfully updated.")
             return redirect('edit_customers')
         
         # If forms are invalid, re-render page with errors
@@ -417,9 +417,10 @@ class DeactivateCustomerView(View):
 
     def post(self, request, pk, *args, **kwargs):
         customer = get_object_or_404(Client, pk=pk)
-        customer.is_active = False 
+        customer.is_active = False
+        customer.user.is_active = False
         customer.save(update_fields=["is_active"])
-        msg.success(request, "Kunde wurde deaktiviert.")
+        msg.success(request, "Client account deactivated successfully.")
         return redirect(reverse("edit_customers"))
 
 class DeclinedClientsView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -430,7 +431,7 @@ class DeclinedClientsView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def handle_no_permission(self):
         if self.request.user.is_authenticated:
-            return HttpResponseForbidden("Sie haben keine Berechtigung, diesen Kunden zu bearbeiten.")
+            return HttpResponseForbidden("You do not have the authorization to modify this user.")
         return super().handle_no_permission()
     
     def get(self, request):
@@ -451,7 +452,7 @@ class AgentFeedbackView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def handle_no_permission(self):
         if self.request.user.is_authenticated:
-            return HttpResponseForbidden("Sie haben keine Berechtigung, diesen Kunden zu bearbeiten.")
+            return HttpResponseForbidden("You do not have the authorization to modify this user.")
         return super().handle_no_permission()
     
     def get(self, request):
@@ -502,15 +503,15 @@ class AcceptOfferView(LoginRequiredMixin, View):
         # Optional: check that user belongs to this offer (e.g., offer.client.user == request.user)
         print(offer.client.user)
         if not offer.client or offer.client.user != request.user:
-            msg.error(request, "Sie haben keine Berechtigung, dieses Angebot anzunehmen.")
+            msg.error(request, "You do not have the authorization to accept the offer.")
             return redirect('offer_detail', pk=pk)
 
         if offer.is_accepted is True:
-            msg.info(request, "Dieses Angebot wurde bereits akzeptiert.")
+            msg.info(request, "This offer is already accepted.")
         else:
             offer.is_accepted = True
             offer.save()
-            msg.success(request, "Sie haben das Angebot angenommen.")
+            msg.success(request, "You have accepted this offer.")
 
         return redirect('offer_detail', pk=pk)
 
@@ -519,7 +520,7 @@ class AcceptOfferView(LoginRequiredMixin, View):
 
     def handle_no_permission(self):
         if self.request.user.is_authenticated:
-            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
+            return HttpResponseForbidden("You do not have the authorization to modify this offer.")
         return super().handle_no_permission()
 
 
@@ -531,15 +532,15 @@ class RejectOfferView(LoginRequiredMixin, View):
 
         # Optional: check that user belongs to this offer
         if not offer.client or offer.client.user != request.user:
-            msg.error(request, "Sie haben keine Berechtigung, dieses Angebot abzulehnen.")
+            msg.error(request, "You do not have the authorization to reject the offer.")
             return redirect('offer_detail', pk=pk)
 
         if offer.is_accepted is False:
-            msg.info(request, "Dieses Angebot wurde bereits abgelehnt.")
+            msg.info(request, "This offer is already rejected.")
         else:
             offer.is_accepted = False
             offer.save()
-            msg.success(request, "Sie haben das Angebot abgelehnt.")
+            msg.success(request, "You have rejected this offer.")
 
         return redirect('offer_detail', pk=pk)
 
@@ -548,7 +549,7 @@ class RejectOfferView(LoginRequiredMixin, View):
 
     def handle_no_permission(self):
         if self.request.user.is_authenticated:
-            return HttpResponseForbidden("Sie haben keine Berechtigung, dieses Angebot zu bearbeiten.")
+            return HttpResponseForbidden("You do not have the authorization to modify this offer.")
         return super().handle_no_permission()
 
 
@@ -567,7 +568,7 @@ class ChatView(LoginRequiredMixin, View):
         if chat_id:
             chat = get_object_or_404(Chat, pk=chat_id)
             if chat.user.id != request.user.id:
-                return HttpResponseForbidden()
+                return HttpResponseForbidden("You do not have the authorization to view this chat.")
             request.session['chat_id'] = chat_id
             if chat.message_history:
                 request.session[f'chat_history_{chat_id}'] = json.loads(chat.message_history)
@@ -650,7 +651,8 @@ def reset_chat(request, offer_id):
         }, status=200)
 
 
-class OfferFinderView(View):
+class OfferFinderView(View, LoginRequiredMixin):
+    login_url = "/login"
     template_name = "offer_finder.html"
 
     def get(self, request, *args, **kwargs):
@@ -661,13 +663,35 @@ class OfferFinderView(View):
 
         # Validate numeric input
         if not offer_id.isdigit():
-            msg.error(request, "Bitte eine gültige Offer-ID angeben.")
+            msg.error(request, "Please give a valid id.")
             return redirect(reverse("offer_finder"))
 
         pk = int(offer_id)
 
-        # Optional: ensure the offer exists before redirect
         get_object_or_404(CreditOffer, pk=pk)
 
         return redirect("offer_detail", pk=pk)
+
+class MoreInfoView(View):
+    template_name = "footer/info.html"
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+class ContactView(View):
+    template_name = "footer/contact.html"
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+
+class CarrersView(View):
+    template_name = "footer/careers.html"
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+
+class DataPrivacyView(View):
+    template_name = "footer/privacy.html"
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
 

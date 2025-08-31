@@ -1,17 +1,18 @@
 {% extends "index.html" %}
+{% block title %}My Offers{% endblock %}
 
 {% block content %}
 <div class="container my-5" style="max-width: 900px;">
-  <h2 class="mb-4">Ihre Kreditanfragen und -angebote</h2>
+  <h2 class="mb-4">Your Credit offers</h2>
 
   {% if credit_offers %}
     <table class="table table-striped table-bordered align-middle">
       <thead class="table-primary">
         <tr>
-          <th scope="col">Angebotsnummer</th>
-          <th scope="col">Betrag</th>
+          <th scope="col">Offer ID</th>
+          <th scope="col">Credit amount</th>
           <th scope="col">Status</th>
-          <th scope="col">Antragsdatum</th>
+          <th scope="col">Created on</th>
           <th scope="col">Details</th>
         </tr>
       </thead>
@@ -37,7 +38,7 @@
     </table>
   {% else %}
     <div class="alert alert-info text-center">
-      Sie haben derzeit keine Kreditangebote.
+      You don't have any credit offers yet.
     </div>
   {% endif %}
 </div>

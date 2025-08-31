@@ -1,4 +1,5 @@
 {% extends 'index.html' %}
+{% block title %}Offer #{{ offer.id }}{% endblock %}
 
 {% block content %}
 <div class="container my-5">
@@ -16,45 +17,77 @@
       {% if offer.client.id == user.id or user.is_moderator %}
       <div class="card shadow-sm">
         <div class="card-header bg-primary text-white text-center">
-          <h3 class="mb-0">Kreditangebot Details — Angebot #{{ offer.id }}</h3>
+          <h3 class="mb-0">Credit Offer Details - Offer #{{ offer.id }}</h3>
         </div>
 
         <div class="card-body">
           <dl class="row gy-2">
             {% if user.is_authenticated and user.is_moderator %}
-            <dt class="col-sm-5">Benutzer</dt>
+            <dt class="col-sm-5">User</dt>
             <dd class="col-sm-7 d-flex align-items-center">
               <span class="text-break flex-grow-1">{{ offer.client.user.email }}</span>
-              <a href="{% url 'edit_offer_email' offer.id %}" class="btn btn-sm btn-outline-secondary ms-3" title="E-Mail bearbeiten">
+              <a href="{% url 'edit_offer_email' offer.id %}" class="btn btn-sm btn-outline-secondary ms-3" title="Edit email">
                 <i class="bi bi-pencil"></i> Edit Email
               </a>
             </dd>
             {% endif %}
 
-            <dt class="col-sm-5">Betrag</dt>
+            {% if user.is_authenticated and user.is_moderator %}
+                <dt class="col-sm-5">Offer Amount Requested</dt>
+                <dd class="col-sm-7">{{ offer.client.credit_amount }} €</dd>
+
+                <dt class="col-sm-5">Offer Duration Requested</dt>
+                <dd class="col-sm-7">{{ offer.client.duration }} Months</dd>
+
+                <dt class="col-sm-5">Offer Purpose</dt>
+                <dd class="col-sm-7">{{ offer.client.purpose }}</dd>
+
+                <dt class="col-sm-5">Client Age</dt>
+                <dd class="col-sm-7">{{ offer.client.age }}</dd>
+
+                <dt class="col-sm-5">Client Sex</dt>
+                <dd class="col-sm-7">{{ offer.client.sex }}</dd>
+
+                <dt class="col-sm-5">Client Job</dt>
+                <dd class="col-sm-7">{{ offer.client.job }}</dd>
+
+                <dt class="col-sm-5">Client Housing situation</dt>
+                <dd class="col-sm-7">{{ offer.client.housing }}</dd>
+
+                <dt class="col-sm-5">Client Saving Account</dt>
+                <dd class="col-sm-7">{{ offer.client.saving_account }}</dd>
+
+                <dt class="col-sm-5">Client Checking Account</dt>
+                <dd class="col-sm-7">{{ offer.client.checking_account }}</dd>
+
+                <dt class="col-sm-5">Client Risk Score Estimation</dt>
+                <dd class="col-sm-7">{{ offer.client.risk_score|floatformat:2 }}</dd>
+            {% endif %}
+
+            <dt class="col-sm-5">Loan Type Description</dt>
+            <dd class="col-sm-7">{{ offer.loan_type.description }}</dd>
+
+            <dt class="col-sm-5">Loan Type Range</dt>
             <dd class="col-sm-7">{{ offer.loan_type.amount_start }} - {{ offer.loan_type.amount_end }} €</dd>
 
-            <dt class="col-sm-5">Zinssatz</dt>
+            <dt class="col-sm-5">Interest Rate</dt>
             <dd class="col-sm-7">{{ offer.loan_type.interest|floatformat:2 }}</dd>
 
-            <dt class="col-sm-5">Laufzeit (Monate)</dt>
+            <dt class="col-sm-5">Loan Type Duration (Months)</dt>
             <dd class="col-sm-7">{{ offer.loan_type.duration }}</dd>
-
-            <dt class="col-sm-5">Beschreibung</dt>
-            <dd class="col-sm-7">{{ offer.loan_type.description }}</dd>
 
             <dt class="col-sm-5">Status</dt>
             <dd class="col-sm-7">
               {% if offer.is_accepted == True %}
-                <span class="badge bg-success">Akzeptiert</span>
+                <span class="badge bg-success">Accepted</span>
               {% elif offer.is_accepted == False %}
-                <span class="badge bg-danger">Abgelehnt</span>
+                <span class="badge bg-danger">Declined</span>
               {% else %}
                 <span class="badge bg-secondary">Pending</span>
               {% endif %}
             </dd>
 
-            <dt class="col-sm-5">Antragsdatum</dt>
+            <dt class="col-sm-5">Created on</dt>
             <dd class="col-sm-7">{{ offer.created_at|date:"d.m.Y" }}</dd>
 
             {% if user.is_authenticated and user.is_moderator %}
@@ -63,53 +96,55 @@
             {% endif %}
 
             {% if user.is_authenticated and user.is_moderator %}
-            <dt class="col-sm-5">E-Mail Inhalt</dt>
+            <dt class="col-sm-5">E-Mail Content</dt>
             <dd class="col-sm-7">
               <pre class="bg-light p-2 rounded text-break mb-0" style="white-space: pre-wrap;">{{ offer.email_content }}</pre>
             </dd>
             {% endif %}
             
             {% if user.is_authenticated and user.is_moderator %}
-            <dt class="col-sm-5">Moderator Kommentar</dt>
+            <dt class="col-sm-5">Moderator Comments</dt>
             <dd class="col-sm-7">{{ offer.moderator_feedback|linebreaksbr }}</dd>
             {% endif %}
 
-            <dt class="col-sm-5">Aktiv?</dt>
+            <dt class="col-sm-5">Active?</dt>
             <dd class="col-sm-7">
-              {% if offer.is_active %}
-                <span class="badge bg-success">Ja</span>
+              {% if offer.is_draft %}
+                <span class="badge bg-secondary">Draft</span>
+              {% elif offer.is_active %}
+                  <span class="badge bg-success">Yes</span>
               {% else %}
-                <span class="badge bg-danger">Nein</span>
+                  <span class="badge bg-danger">No</span>
               {% endif %}
             </dd>
 
-            <dt class="col-sm-5">Ablaufdatum</dt>
+            <dt class="col-sm-5">Active till</dt>
             <dd class="col-sm-7">{{ expiry_date|date:"d.m.Y" }}</dd>
           </dl>
         </div>
         <div class="card-footer text-center">
           {% if not user.is_moderator %}
-            <a href="{% url 'my_offers' %}" class="btn btn-secondary">Zurück zu meinen Angeboten</a>
+            <a href="{% url 'my_offers' %}" class="btn btn-secondary">Back to my offers</a>
           {% else %}
-            <a href="{% url 'moderator_offers' %}" class="btn btn-secondary">Zurück zu Angeboten</a>
+            <a href="{% url 'moderator_offers' %}" class="btn btn-secondary">Back to offers overview</a>
           {% endif %}
           {% if user.is_authenticated and user.is_moderator %}
           <form method="post" action="{% url 'send_offer_email' offer.id %}" class="d-inline">
             {% csrf_token %}
-            <button type="submit" class="btn btn-primary">E-Mail senden</button>
+            <button type="submit" class="btn btn-primary">Send Email</button>
           </form>
           {% else %}
             {% if offer.is_accepted == None %}
             <form method="post" action="{% url 'accept_offer' offer.id %}" class="d-inline">
             {% csrf_token %}
               <button type="submit" class="btn btn-success me-2">
-                <i class="bi bi-check-circle me-1"></i>Annehmen
+                <i class="bi bi-check-circle me-1"></i>Accept
               </button>
             </form>
             <form method="post" action="{% url 'reject_offer' offer.id %}" class="d-inline">
               {% csrf_token %}
               <button type="submit" class="btn btn-danger">
-                <i class="bi bi-x-circle me-1"></i>Ablehnen
+                <i class="bi bi-x-circle me-1"></i>Reject
               </button>
             </form>
             {% endif %}

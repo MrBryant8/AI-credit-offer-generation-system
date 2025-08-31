@@ -40,5 +40,11 @@ urlpatterns = [
     path("manage/feedback/<int:pk>/decline/", AgentFeedbackDeclineView.as_view(), name="decline_agent_feedback"),
     path("manage/feedback/<int:pk>/report/", AgentFeedbackReportView.as_view(), name="report_agent_feedback"),
     path("create-email/", write_email, name="create_email"),
+    path("more-info/", MoreInfoView.as_view(), name="more_info"),
+    path("data-privacy", DataPrivacyView.as_view(), name="data_privacy"),
+
+    path("careers", CarrersView.as_view(), name="careers"),
+
+    path("contact", ContactView.as_view(), name="contact"),
     path('api/', include(router.urls))
 ]

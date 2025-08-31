@@ -149,6 +149,9 @@ with open('/run/secrets/gemini_api_key', 'r') as f:
 # Risky user threshold
 RISK_THRESHOLD = float(os.environ.get("RISK_THRESHOLD", 0.25))
 
+BANK_DEFAULT_PHONE_NUMBER = os.environ.get("BANK_DEFAULT_PHONE_NUMBER", "+359 811 111 111")
+BANK_DEFAULT_ADRESS = os.environ.get("BANK_DEFAULT_ADRESS", "blvd. St. Kliment Ohritski 8, Sofia, Bulgaria")
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

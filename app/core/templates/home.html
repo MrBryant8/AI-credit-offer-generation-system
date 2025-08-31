@@ -1,10 +1,12 @@
 {% extends "index.html" %}
+
+{% block title %}Home{% endblock %}
 {% block content %}
 
 {% if messages %}
   <div class="container mt-3">
     {% for message in messages %}
-      <div class="alert 
+      <div class="alert
         {% if message.tags %} alert-{{ message.tags }} {% else %} alert-info {% endif %} alert-dismissible fade show" role="alert">
         {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -13,39 +15,62 @@
   </div>
 {% endif %}
 
-<div class="container my-5" style="max-width:800px;">
-  <h1 class="mb-4 text-center">Willkommen bei SmartCredit</h1>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <h1 class="mb-4 text-center">Welcome to SmartCredit</h1>
+        <div class="col-md-8">
 
-  <p class="lead text-center mb-5">
-    Ihre vertrauenswürdige Bank für personalisierte Kreditangebote und innovative Finanzlösungen.
-  </p>
+            <div class="mb-4">
+                <h2>Smart Lending Solutions</h2>
+                <p>We are dedicated to revolutionizing the loan industry through AI-powered technology and personalized financial solutions. Founded with a vision to make credit accessible and transparent, we combine cutting-edge artificial intelligence with human expertise to deliver the best loan offers tailored to your unique financial profile.</p>
+            </div>
 
-  <section class="mb-5">
-    <h2>Über SmartCredit</h2>
-    <p>
-      SmartCredit steht für intelligente und einfache Kreditvergabe – schnell, transparent und sicher.
-      Mit modernen KI-Agenten und neuesten Cloud-Technologien bieten wir individuelle Kreditangebote,
-      die exakt auf Ihre Bedürfnisse zugeschnitten sind.
-    </p>
-  </section>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h3>Our Mission</h3>
+                    <p>To democratize access to credit by providing instant, personalized loan offers through innovative AI technology while maintaining the highest standards of transparency and customer service.</p>
+                </div>
 
-  <section class="mb-5">
-    <h2>Unsere Leistungen</h2>
-    <ul>
-      <li>Automatisierte und personalisierte Kreditangebote</li>
-      <li>Dynamische Anpassung von Marketingtexten auf Basis von Kundenprofilen</li>
-      <li>24/7 Kundenservice mit persönlicher Beratung und KI-Unterstützung</li>
-      <li>Sichere Online-Plattform mit modernsten Datenschutz-Standards</li>
-    </ul>
-  </section>
+                <div class="col-md-6">
+                    <h3>Our Vision</h3>
+                    <p>To be the leading AI-powered lending platform, recognized for delivering fair, fast, and intelligent loan solutions that empower individuals to achieve their financial goals.</p>
+                </div>
+            </div>
 
-  <section>
-    <h2>Warum SmartCredit?</h2>
-    <p>
-      Wir verbinden technologische Innovation mit persönlicher Betreuung. Unsere Webanwendung ermöglicht
-      eine schnelle und transparente Kreditentscheidung, die das Finanzleben unserer Kunden einfacher macht.
-      Vertrauen Sie auf SmartCredit – Ihr Partner für smarte Finanzlösungen.
-    </p>
-  </section>
+            <h2>Our AI-Powered Services</h2>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">24/7 AI Support</h5>
+                            <p class="card-text">Our intelligent chatbots and AI assistants provide round-the-clock support to answer questions and guide you through the loan process.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Risk Assessment</h5>
+                            <p class="card-text">Our AI continuously monitors and assesses risk factors to ensure responsible lending practices and protect both borrowers and lenders.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Credit Analysis</h5>
+                            <p class="card-text">Advanced machine learning models evaluate multiple data points to provide accurate credit assessments and loan recommendations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h2>Get Your Personalized Loan Offer</h2>
+                <p>Ready to discover what our AI can do for you? Get started with our quick application process and receive multiple personalized loan offers in minutes. <a href="#" class="text-decoration-none">Apply now</a> and experience the future of lending with SmartCredit.</p>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

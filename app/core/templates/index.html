@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Startseite – SmartCredit</title>
+    <title>{% block title %}Start - SmartCredit{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Optionally include Bootstrap from CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
@@ -89,20 +89,20 @@
     <!-- Links as a tabular grid -->
     <div class="row mb-3">
       <div class="col-6">
-        <a href="#" class="text-decoration-none text-secondary">Kontakt</a>
+        <a href="{% url 'contact' %}" class="text-decoration-none text-secondary">Contact</a>
       </div>
       <div class="col-6">
-        <a href="#" class="text-decoration-none text-secondary">Support</a>
+        <a href="{% url 'data_privacy' %}" class="text-decoration-none text-secondary">Data Privacy Statement</a>
       </div>
     </div>
 
     <!-- Second row can be for additional info or empty for spacing -->
     <div class="row mb-3">
         <div class="col-6">
-        <a href="#" class="text-decoration-none text-secondary">Besuch buchen</a>
+        <a href="{% url 'careers' %}" class="text-decoration-none text-secondary">Careers</a>
       </div>
       <div class="col-6">
-        <a href="#" class="text-decoration-none text-secondary">Mehr Info</a>
+        <a href="{% url 'more_info' %}" class="text-decoration-none text-secondary">More Information</a>
       </div>
     </div>
 
