@@ -1,4 +1,3 @@
-# src/latest_ai_development/config/tasks.yaml
 credit_approval_email_task:
   description: >
     Draft a professional and compliant credit approval email using the provided client, offer,
@@ -19,7 +18,8 @@ email_qa_task:
   description: >
     "Review the response drafted by the Senior Email Specialist. 
     Ensure that the email is comprehensive, accurate, and adheres to the high-quality standards expected for a credit company. 
-    Verify that all parts of the email have been addressed thoroughly, with a helpful and friendly tone. Verify that the email ends with a formal regard from SmartCredit such as Kind regards, SmartCredit or anything similar."
+    Verify that all parts of the email have been addressed thoroughly, with a helpful and friendly tone. 
+    Verify that the email ends with a formal regard from SmartCredit such as Kind regards, SmartCredit or anything similar."
   expected_output: >
    "A final, detailed, and informative email about the credit offer ready to be sent to the customer.
     Don't be too formal, we are a chill and cool company but maintain a professional and friendly tone throughout.

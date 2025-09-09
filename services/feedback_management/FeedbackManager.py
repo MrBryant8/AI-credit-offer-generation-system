@@ -44,7 +44,7 @@ class FeedbackManager:
     
     def get_current_agent_feedback_count(self):
         agent_feedbacks = self.rest.get_agent_feedback_objects()
-        active_agent_feedbacks = [feedback for feedback in agent_feedbacks if agent_feedbacks["is_reviewed"] == False]
+        active_agent_feedbacks = [feedback for feedback in agent_feedbacks if feedback["is_reviewed"] == False]
         return len(active_agent_feedbacks)
     
 

@@ -81,8 +81,8 @@ class EditOfferEmailForm(forms.ModelForm):
         }
         labels = {
             'email_subject': 'E-Mail Subject',
-            'email_content': 'E-Mail Inhalt',
-            'moderator_feedback': 'Moderator Kommentar',
+            'email_content': 'E-Mail Content',
+            'moderator_feedback': 'Moderator Remark',
         }
 
 

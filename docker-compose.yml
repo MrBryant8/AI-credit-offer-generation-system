@@ -82,8 +82,7 @@ models:
         model: ai/gemma3
         context_size: 4096
         runtime_flags:
-        - "--verbose"                       # Set verbosity level to infinity
-        - "--verbose-prompt"                # Print a verbose prompt before generation
+
         - "--log-prefix"                    # Enable prefix in log messages
         - "--log-timestamps"                # Enable timestamps in log messages
         - "--log-colors" 

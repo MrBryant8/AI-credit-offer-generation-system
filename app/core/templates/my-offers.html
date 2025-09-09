@@ -30,7 +30,7 @@
           {% endif %}
           <td>{{ offer.created_at|date:"d.m.Y" }}</td>
           <td>
-            <a href="{% url 'offer_detail' offer.id %}" class="btn btn-outline-primary btn-sm">Ansehen</a>
+            <a href="{% url 'offer_detail' offer.id %}" class="btn btn-outline-primary btn-sm">View</a>
           </td>
         </tr>
         {% endfor %}

@@ -1,6 +1,0 @@
-Model,Test_ROC_AUC
-Tuned SVM (Final),0.7758333333333332
-Gradient Boosting,0.7713095238095239
-Logistic Regression,0.7685714285714286
-Support Vector Machine,0.7580952380952379
-Random Forest,0.7423214285714286

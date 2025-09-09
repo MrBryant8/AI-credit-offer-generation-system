@@ -28,7 +28,7 @@
                             </button>
                         </li>
                     {% empty %}
-                        <li class="list-group-item text-muted">Keine Chats</li>
+                        <li class="list-group-item text-muted">No Chats</li>
                     {% endfor %}
                 </ul>
             </div>
@@ -38,7 +38,7 @@
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">
                         <i class="bi bi-robot me-2"></i>
-                        KI-Chat Assistent - Creditoffer #{{ offer.id }}
+                        AI-Chat assistent - Credit Offer #{{ offer.id }}
                     </h4>
                     <p>{{ offer.loan_type.description }}</p>
                 </div>
@@ -57,7 +57,7 @@
                     {% empty %}
                         <div class="text-center text-muted mt-5">
                             <i class="bi bi-chat-dots fs-2"></i>
-                            <div>Frag mich alles – der Chat ist noch leer.</div>
+                            <div>Ask me anything.</div>
                         </div>
                     {% endfor %}
                 </div>

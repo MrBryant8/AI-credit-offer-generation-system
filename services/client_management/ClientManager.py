@@ -79,7 +79,7 @@ class ClientManager:
     def get_new_clients(clients_list_json):
         new_clients = []
         for client in clients_list_json:
-            if not client.get("risk_score") and client.get("is_active") is False:
+            if not client.get("risk_score") and client.get("is_active") is True:
                 new_clients.append(client)
 
         return new_clients

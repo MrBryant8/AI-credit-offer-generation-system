@@ -22,7 +22,7 @@ class EmailCrew():
   def gemini_llm(self) -> LLM:
     llm = LLM(
         model="gemini/gemini-2.0-flash-lite",
-        temperature=0.7,
+        temperature=0.5,
     )
     return llm
 

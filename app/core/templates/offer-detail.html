@@ -102,12 +102,20 @@
             <dt class="col-sm-5">Moderator Comments</dt>
             <dd class="col-sm-7">{{ offer.moderator_feedback|linebreaksbr }}</dd>
             {% endif %}
+            {% if user.is_authenticated and user.is_moderator and user.id != offer.client.user.id %}
+                <dt class="col-sm-5">Sent to client?</dt>
+                <dd class="col-sm-7">
+                  {% if offer.is_draft == False %}
+                      <span class="badge bg-success">Yes</span>
+                  {% else %}
+                      <span class="badge bg-danger">No</span>
+                  {% endif %}
+                </dd>
+            {% endif %}
 
             <dt class="col-sm-5">Active?</dt>
             <dd class="col-sm-7">
-              {% if offer.is_draft %}
-                <span class="badge bg-secondary">Draft</span>
-              {% elif offer.is_active %}
+              {% if offer.is_active == True %}
                   <span class="badge bg-success">Yes</span>
               {% else %}
                   <span class="badge bg-danger">No</span>

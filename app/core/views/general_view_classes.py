@@ -207,7 +207,7 @@ class ModeratorOffersView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def get(self, request):
         deactivate_old_credit_offers()
-        credit_offers = CreditOffer.objects.filter(is_draft=True).exclude(client_id=request.user.id).order_by('created_at')
+        credit_offers = CreditOffer.objects.filter(is_draft=True, is_accepted=None).exclude(client_id=request.user.id).order_by('created_at')
         return render(request, 'suggested-offers.html', {'credit_offers': credit_offers})
 
 
@@ -581,6 +581,7 @@ class ChatView(LoginRequiredMixin, View):
     def post(self, request, pk):
         offer = get_object_or_404(CreditOffer, pk=pk)
         offer_text = rephraze_offer(offer)
+        print(offer_text)
         user_message = request.POST.get('message')
         chat_id = request.session.get("chat_id")
         session_key = f'chat_history_{chat_id}'

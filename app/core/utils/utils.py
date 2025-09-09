@@ -101,7 +101,7 @@ def rephraze_offer(offer):
     # Add more context if needed
     if offer.loan_type:
         context_lines.append("\nLoan Details:")
-        context_lines.append(f"- Interest Rate: {offer.loan_type.interest}")
+        context_lines.append(f"- Interest Rate: {offer.loan_type.interest  * 100}")
         context_lines.append(f"- Amount Range: {offer.loan_type.amount_start} to {offer.loan_type.amount_end}")
         context_lines.append(f"- Duration: {offer.loan_type.duration} months")
         context_lines.append(f"- Description: {offer.loan_type.description or 'N/A'}")
