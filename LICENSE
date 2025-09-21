@@ -1,21 +1,53 @@
-MIT License
+Non-Commercial Software License (NCSL)
 
-Copyright (c) 2025 Mincho Tanev
+Copyright (c) 2025 Mincho Tanev (Author).
+All rights reserved. The Software is owned by the German Engineering and Industrial Management Faculty, Faculty of German (Owner).
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Definitions
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+“Software” means the source code, object code, documentation, and associated files.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+“Non-Commercial Use” means use that is not intended for or directed toward commercial advantage or monetary compensation, including individual, academic, research, educational, or non-profit uses.
+
+“Commercial Use” means any use by or for a for‑profit entity, any internal business use of a for‑profit entity, any monetized service, paid feature, or distribution with the intent to generate revenue.
+
+Grant of Rights (Non-Commercial Only)
+Subject to this License, permission is granted to use, copy, modify, and redistribute the Software solely for Non-Commercial Use, provided that:
+
+This License and all notices in Section 4 are included with all copies and substantial portions of the Software and, where practicable, in documentation or about dialogs.
+
+Any distribution of modifications or derivative works is licensed under this same License.
+
+Restrictions
+
+Commercial Use is prohibited unless separately licensed in writing by the Owner.
+
+No sublicensing for Commercial Use.
+
+No removal or alteration of authorship, ownership, or contribution notices.
+
+No use of the Owner’s or Author’s names, logos, or marks to endorse or promote derivative works without prior written permission.
+
+Attribution and Notices
+
+Authorship: Mincho Tanev.
+
+Ownership: German Engineering and Industrial Management Faculty, Faculty of German.
+
+Contributions: Includes contributions by Associate Professor Alexander Efremov.
+
+Required Attribution: “Based on software authored by Mincho Tanev; owned by the German Engineering and Industrial Management Faculty, Faculty of German; with contributions from Associate Professor Alexander Efremov.”
+
+No Warranty
+THE SOFTWARE IS PROVIDED “AS IS,” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON‑INFRINGEMENT.
+
+Limitation of Liability
+IN NO EVENT SHALL THE AUTHOR OR OWNER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Termination
+Any breach of this License terminates the rights granted herein. Upon termination, all use must cease, and all copies must be destroyed or returned. Valid prior distributions in compliance remain unaffected.
+
+Governing Law
+This License is governed by the laws applicable at the Owner’s principal place of business, unless otherwise agreed in writing.
+
+For Commercial Use inquiries, contact: mincho.ta@gmail.com
