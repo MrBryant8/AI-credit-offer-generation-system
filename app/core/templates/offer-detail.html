@@ -166,7 +166,7 @@
   </div>
 </div>
 
-{% if user.is_authenticated and not user.is_moderator %}
+{% if user.is_authenticated and offer.client.user.id == user.id %}
   <!-- Floating Explain Offer Button -->
   <a href="{% url 'chat_page' offer.id %}" 
      class="btn btn-info shadow-lg rounded-circle d-flex align-items-center justify-content-center"

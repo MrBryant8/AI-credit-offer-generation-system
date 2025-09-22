@@ -12,13 +12,12 @@ class Command(BaseCommand):
 
         self.stdout.write("Starting database seeding...")
 
-        # 1. Create 3 users
         users_data = [
-            {"first_name": "Alice", "last_name": "Müller", "email": "alice@smartcredit.com", "password": "alicepw"},
-            {"first_name": "Bob", "last_name": "Klein", "email": "bob@smartcredit.com", "password": "bobpw"},
-            {"first_name": "Carla", "last_name": "Schmidt", "email": "carla@smartcredit.com", "password": "carlapw"},
-            {"first_name": "David", "last_name": "Neumann", "email": "david@smartcredit.com", "password": "davidpw"},
-            {"first_name": "Eva", "last_name": "Fischer", "email": "eva@smartcredit.com", "password": "evapw"},
+            {"first_name": "Alice", "last_name": "Müller", "email": "alice@smartcredit.com", "password": "alicepw", "phone_number": "12341234"},
+            {"first_name": "Bob", "last_name": "Klein", "email": "bob@smartcredit.com", "password": "bobpw", "phone_number": "11111111"},
+            {"first_name": "Carla", "last_name": "Schmidt", "email": "carla@smartcredit.com", "password": "carlapw", "phone_number": "22222222"},
+            {"first_name": "David", "last_name": "Neumann", "email": "david@smartcredit.com", "password": "davidpw", "phone_number": "00000000"},
+            {"first_name": "Eva", "last_name": "Fischer", "email": "eva@smartcredit.com", "password": "evapw", "phone_number": "33333333"},
         ]
 
         created_users = []
@@ -29,7 +28,8 @@ class Command(BaseCommand):
                     "first_name": udata["first_name"],
                     "last_name": udata["last_name"],
                     "is_active": True,
-                    "is_moderator": True if udata["email"] == "bob@smartcredit.com" else False
+                    "is_moderator": True if udata["email"] == "bob@smartcredit.com" else False,
+                    "phone_number": udata["phone_number"]
                 }
             )
             if created:

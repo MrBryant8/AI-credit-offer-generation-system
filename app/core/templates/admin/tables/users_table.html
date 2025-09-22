@@ -5,8 +5,9 @@
 <table class="table table-striped table-bordered align-middle">
   <thead class="table-light">
     <tr>
-      <th>Email</th>
       <th>Name</th>
+      <th>Email</th>
+      <th>Phone Number</th>
       <th>Moderator</th>
       <th>Active</th>
       <th>Date Joined</th>
@@ -15,8 +16,9 @@
   <tbody>
     {% for user in page_obj %}
     <tr>
-      <td>{{ user.email }}</td>
       <td>{{ user.get_full_name|default:"-" }}</td>
+      <td>{{ user.email }}</td>
+      <td>{{ user.phone_number }}</td>
       <td>{% if user.is_moderator %}Yes{% else %}No{% endif %}</td>
       <td>{% if user.is_active %}Yes{% else %}No{% endif %}</td>
       <td>{{ user.date_joined|date:"d.m.Y" }}</td>
