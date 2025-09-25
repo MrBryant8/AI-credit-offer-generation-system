@@ -147,8 +147,8 @@ def save_messages(chat_id, messages_list):
     Chat.objects.filter(id=chat_id).update(message_history=messages_redacted_json)
 
 
-def prepare_chat_list(user_id):
-    all_chats = Chat.objects.filter(user_id=user_id).order_by('id')
+def prepare_chat_list(user_id, offer_id):
+    all_chats = Chat.objects.filter(user_id=user_id, credit_offer_id=offer_id).order_by('id')
     return all_chats
 
 def get_high_risk_clients(threshold):

@@ -209,8 +209,8 @@ class ChatView(LoginRequiredMixin, View):
             if chat.message_history:
                 request.session[f'chat_history_{chat_id}'] = json.loads(chat.message_history)
 
-        all_chats = prepare_chat_list(self.request.user.id)
         offer = get_object_or_404(CreditOffer, pk=pk)
+        all_chats = prepare_chat_list(self.request.user.id, offer.id)
         if request.session.get(self.chat_id_key) is None:
             chat_id = create_chat(offer, request.user)
             request.session["chat_id"] = chat_id

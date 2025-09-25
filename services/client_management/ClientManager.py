@@ -18,6 +18,9 @@ class ClientManager:
     def predict_credit_risk(self, client):
         pipeline = joblib.load("ml/output/credit_risk_pipeline.joblib")
         client_df = self.generate_client_dataframe(client)
+        client_classification = pipeline.predict(client_df)
+        if client_classification == 0: # Classified as "High Risk"
+            return 0
         low_risk_probability = pipeline.predict_proba(client_df)[0, 1]
         return low_risk_probability
 
