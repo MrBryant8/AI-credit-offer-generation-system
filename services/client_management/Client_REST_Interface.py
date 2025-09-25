@@ -62,7 +62,11 @@ class REST:
         headers["Accept"] = "application/json"
 
         response = requests.post(url, json=payload, headers=headers, timeout=60)
-        return response.json()
+        if 200 <= response.status_code < 300:
+            return response.json()
+        else:
+            print(f"Response returned non-success:\nStatus code: {response.status_code}")
+            raise Exception("LLM response is not success")
     
     def save_offer(self, client_type_id, loan_type_id, email_subject, email_content):
         url = f"{self.rest_url}/credit-offers/"

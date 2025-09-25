@@ -3,7 +3,7 @@ from google import genai
 from google.genai import types
 import os
 
-def gemini_ask(client: genai.Client, question, model="gemini-2.0-flash-lite"): 
+def gemini_ask(client: genai.Client, question, model="gemini-2.0-flash"): 
     return client.models.generate_content(
         model=model, 
         contents=question, 

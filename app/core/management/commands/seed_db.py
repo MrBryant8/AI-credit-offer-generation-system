@@ -12,6 +12,7 @@ class Command(BaseCommand):
 
         self.stdout.write("Starting database seeding...")
 
+        # 1. Create 5 test users
         users_data = [
             {"first_name": "Alice", "last_name": "Müller", "email": "alice@smartcredit.com", "password": "alicepw", "phone_number": "12341234"},
             {"first_name": "Bob", "last_name": "Klein", "email": "bob@smartcredit.com", "password": "bobpw", "phone_number": "11111111"},

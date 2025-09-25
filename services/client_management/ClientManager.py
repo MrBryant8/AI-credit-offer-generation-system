@@ -63,7 +63,11 @@ class ClientManager:
 
         loan_type_desc = "The perfect loan for small buying and a solid ground for something bigger." if not loan_type else loan_type.get("description")
         loan_type_id = 0 if not loan_type else loan_type.get("id")
-        email_json = self.rest.generate_email(client, loan_type_desc, user_name, details_link)
+        try:
+            email_json = self.rest.generate_email(client, loan_type_desc, user_name, details_link)
+        except Exception:
+            print("LLM may be down. Try again later.")
+            return False
         email_dict = json.loads(email_json)
         offer_saved = self.rest.save_offer(client.get("id"), loan_type_id, email_dict["subject"], email_dict["content"])
 

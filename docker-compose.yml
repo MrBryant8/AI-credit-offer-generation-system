@@ -83,8 +83,8 @@ models:
         context_size: 4096
         runtime_flags:
 
-        - "--log-prefix"                    # Enable prefix in log messages
-        - "--log-timestamps"                # Enable timestamps in log messages
+        - "--log-prefix"                    
+        - "--log-timestamps"               
         - "--log-colors" 
         
 volumes:

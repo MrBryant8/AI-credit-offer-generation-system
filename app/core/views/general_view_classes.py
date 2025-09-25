@@ -19,6 +19,7 @@ from django.core.paginator import Paginator
 from .agents.crew import EmailCrew
 
 
+# Static Pages
 class LandingPageView(View):
     def get(self, request):
         return render(request, 'index.html')
@@ -51,6 +52,7 @@ class DataPrivacyView(View):
         return render(request, self.template_name)
 
 
+# Login/Logout/Register
 class LoginPageView(FormView):
     def get(self, request):
         return render(request, 'login.html')
@@ -117,7 +119,7 @@ class CustomPasswordChangeView(PasswordChangeView, LoginRequiredMixin):
 
         return super().form_valid(form)
 
-
+# Customer Core
 class MyOffersView(LoginRequiredMixin, View):
     login_url = '/login'
 
@@ -142,8 +144,119 @@ class CreditOfferDetailView(LoginRequiredMixin, DetailView):
         context['last_message'] = messages_list[-1] if messages_list else None
 
         return context
+    
+class AcceptOfferView(LoginRequiredMixin, View):
+    login_url = "/login"
+
+    def post(self, request, pk):
+        offer = get_object_or_404(CreditOffer, pk=pk)
+
+        if not offer.client or offer.client.user != request.user:
+            msg.error(request, "You do not have the authorization to accept the offer.")
+            return redirect('offer_detail', pk=pk)
+
+        if offer.is_accepted is True:
+            msg.info(request, "This offer is already accepted.")
+        else:
+            offer.is_accepted = True
+            if offer.is_draft:
+                offer.is_draft = False
+            offer.save()
+            msg.success(request, "You have accepted this offer.")
+
+        return redirect('offer_detail', pk=pk)
 
 
+class RejectOfferView(LoginRequiredMixin, View):
+    login_url = "/login"
+
+    def post(self, request, pk):
+        offer = get_object_or_404(CreditOffer, pk=pk)
+
+        if not offer.client or offer.client.user != request.user:
+            msg.error(request, "You do not have the authorization to reject the offer.")
+            return redirect('offer_detail', pk=pk)
+
+        if offer.is_accepted is False:
+            msg.info(request, "This offer is already rejected.")
+        else:
+            offer.is_accepted = False
+            if offer.is_draft:
+                offer.is_draft = False
+            offer.save()
+            msg.success(request, "You have rejected this offer.")
+
+        return redirect('offer_detail', pk=pk)
+
+
+class ChatView(LoginRequiredMixin, View):
+    template_name = 'chat.html'
+    login_url = "/login"
+    chat_id_key = "chat_id"
+
+    @staticmethod
+    def render_chat_message(raw_message):
+        html_message = markdown.markdown(raw_message)
+        return mark_safe(html_message)  # trust generated HTML
+
+    def get(self, request, pk):
+        chat_id = request.GET.get("chat_id")
+        if chat_id:
+            chat = get_object_or_404(Chat, pk=chat_id)
+            if chat.user.id != request.user.id:
+                return HttpResponseForbidden("You do not have the authorization to view this chat.")
+            request.session['chat_id'] = chat_id
+            if chat.message_history:
+                request.session[f'chat_history_{chat_id}'] = json.loads(chat.message_history)
+
+        all_chats = prepare_chat_list(self.request.user.id)
+        offer = get_object_or_404(CreditOffer, pk=pk)
+        if request.session.get(self.chat_id_key) is None:
+            chat_id = create_chat(offer, request.user)
+            request.session["chat_id"] = chat_id
+        else:
+            chat_id = request.session.get("chat_id")
+
+        history = request.session.get(f'chat_history_{chat_id}', [])
+        context = {
+            'messages': history,
+            'offer': offer,
+            'chat_id': chat_id,
+            'chat_list': all_chats,
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, pk):
+        offer = get_object_or_404(CreditOffer, pk=pk)
+        offer_text = rephraze_offer(offer)
+        print(offer_text)
+        user_message = request.POST.get('message')
+        chat_id = request.session.get("chat_id")
+        session_key = f'chat_history_{chat_id}'
+        history = request.session.get(session_key, [{
+            "role": "system",
+            "content": "You are an expert on credit offers."
+                       "Your skills of explaining a credit offer to customers is unmatched, providing clear and "
+                       "direct instructions to the customer. Maintain a polite and helpful tone. "
+                       f"The credit offer context is {offer_text}. "
+                       "Please provide friendly feedback to any user questions only. "
+                       "Respond in a short, concise manner, with your answers being only relevant to the user question."
+
+        }])
+
+        if user_message:
+            history.append({"role": "user", "content": user_message})
+            llm_response = llm_generate_reply(history)
+            llm_response = self.render_chat_message(llm_response)
+            history.append({"role": "assistant", "content": llm_response})
+
+            request.session[session_key] = history
+
+        return redirect('chat_page', pk=pk)
+
+# Moderator Core
+
+# Admin Dashboard
 class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, View):
     login_url = '/login'
 
@@ -151,7 +264,6 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, View):
         return getattr(self.request.user, 'is_moderator', False)
 
     def handle_no_permission(self):
-        # Optional: render a custom 403 template or return a basic forbidden response
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     def get(self, request):
@@ -172,7 +284,7 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         queryset = model.objects.all().order_by('id')
 
-        paginator = Paginator(queryset, 5)  # 10 items per page
+        paginator = Paginator(queryset, 5)
         page_obj = paginator.get_page(page)
 
         context = {
@@ -182,7 +294,7 @@ class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, View):
         template_name = f'admin/tables/{model_name}_table.html'
         return render(request, template_name, context)
 
-
+# Moderator Control Panel
 class ManageView(LoginRequiredMixin, UserPassesTestMixin, View):
     login_url = '/login'
 
@@ -222,7 +334,7 @@ class EditOfferEmailView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return reverse_lazy('offer_detail', kwargs={'pk': self.object.pk})
 
     def test_func(self):
-        # Only allow moderators
+        # Only allow moderators to access this view
         return self.request.user.is_moderator
 
     def handle_no_permission(self):
@@ -322,7 +434,6 @@ class EditCustomersView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         query = self.request.GET.get('q', '')
         
         if query:
-            # Search by identity number
             queryset = queryset.filter(identity_number__icontains=query)
         
         return queryset.order_by('user__last_name', 'user__first_name').exclude(is_active=False)
@@ -491,122 +602,10 @@ class AgentFeedbackReportView(LoginRequiredMixin, UserPassesTestMixin, View):
         fb = get_object_or_404(AgentFeedback, pk=pk)
         fb.is_reviewed = True
         fb.save(update_fields=["is_reviewed"])
-        # Future Outlook: implement some integration with a ticketing system
+        # Future Outlook: implement some integration with a ticketing system possibly
         msg.success(request, "Agent Feedback reported to IT.")
         return redirect(reverse('manage'))
-
     
-class AcceptOfferView(LoginRequiredMixin, View):
-    login_url = "/login"
-
-    def post(self, request, pk):
-        offer = get_object_or_404(CreditOffer, pk=pk)
-
-        if not offer.client or offer.client.user != request.user:
-            msg.error(request, "You do not have the authorization to accept the offer.")
-            return redirect('offer_detail', pk=pk)
-
-        if offer.is_accepted is True:
-            msg.info(request, "This offer is already accepted.")
-        else:
-            offer.is_accepted = True
-            if offer.is_draft:
-                offer.is_draft = False
-            offer.save()
-            msg.success(request, "You have accepted this offer.")
-
-        return redirect('offer_detail', pk=pk)
-
-
-
-class RejectOfferView(LoginRequiredMixin, View):
-    login_url = "/login"
-
-    def post(self, request, pk):
-        offer = get_object_or_404(CreditOffer, pk=pk)
-
-        if not offer.client or offer.client.user != request.user:
-            msg.error(request, "You do not have the authorization to reject the offer.")
-            return redirect('offer_detail', pk=pk)
-
-        if offer.is_accepted is False:
-            msg.info(request, "This offer is already rejected.")
-        else:
-            offer.is_accepted = False
-            if offer.is_draft:
-                offer.is_draft = False
-            offer.save()
-            msg.success(request, "You have rejected this offer.")
-
-        return redirect('offer_detail', pk=pk)
-
-
-class ChatView(LoginRequiredMixin, View):
-    template_name = 'chat.html'
-    login_url = "/login"
-    chat_id_key = "chat_id"
-
-    @staticmethod
-    def render_chat_message(raw_message):
-        html_message = markdown.markdown(raw_message)
-        return mark_safe(html_message)  # trust generated HTML
-
-    def get(self, request, pk):
-        chat_id = request.GET.get("chat_id")
-        if chat_id:
-            chat = get_object_or_404(Chat, pk=chat_id)
-            if chat.user.id != request.user.id:
-                return HttpResponseForbidden("You do not have the authorization to view this chat.")
-            request.session['chat_id'] = chat_id
-            if chat.message_history:
-                request.session[f'chat_history_{chat_id}'] = json.loads(chat.message_history)
-
-        all_chats = prepare_chat_list(self.request.user.id)
-        offer = get_object_or_404(CreditOffer, pk=pk)
-        if request.session.get(self.chat_id_key) is None:
-            chat_id = create_chat(offer, request.user)
-            request.session["chat_id"] = chat_id
-        else:
-            chat_id = request.session.get("chat_id")
-
-        history = request.session.get(f'chat_history_{chat_id}', [])
-        context = {
-            'messages': history,
-            'offer': offer,
-            'chat_id': chat_id,
-            'chat_list': all_chats,
-        }
-        return render(request, self.template_name, context)
-
-    def post(self, request, pk):
-        offer = get_object_or_404(CreditOffer, pk=pk)
-        offer_text = rephraze_offer(offer)
-        print(offer_text)
-        user_message = request.POST.get('message')
-        chat_id = request.session.get("chat_id")
-        session_key = f'chat_history_{chat_id}'
-        history = request.session.get(session_key, [{
-            "role": "system",
-            "content": "You are an expert on credit offers."
-                       "Your skills of explaining a credit offer to customers is unmatched, providing clear and "
-                       "direct instructions to the customer. Maintain a polite and helpful tone. "
-                       f"The credit offer context is {offer_text}. "
-                       "Please provide friendly feedback to any user questions only. "
-                       "Respond in a short, concise manner, with your answers being only relevant to the user question."
-
-        }])
-
-        if user_message:
-            history.append({"role": "user", "content": user_message})
-            llm_response = llm_generate_reply(history)
-            llm_response = self.render_chat_message(llm_response)
-            history.append({"role": "assistant", "content": llm_response})
-
-            request.session[session_key] = history
-
-        return redirect('chat_page', pk=pk)
-
-
 
 class OfferFinderView(View, LoginRequiredMixin, UserPassesTestMixin):
     login_url = "/login"
@@ -623,10 +622,8 @@ class OfferFinderView(View, LoginRequiredMixin, UserPassesTestMixin):
     def get(self, request, *args, **kwargs):
         offer_id = request.GET.get("offer_id")
         if not offer_id:
-            # First load: show the form
             return render(request, self.template_name)
-
-        # Validate numeric input
+       
         if not offer_id.isdigit():
             msg.error(request, "Please give a valid id.")
             return redirect(reverse("offer_finder"))
@@ -637,7 +634,7 @@ class OfferFinderView(View, LoginRequiredMixin, UserPassesTestMixin):
 
         return redirect("offer_detail", pk=pk)
 
-
+# Util Views
 @csrf_exempt
 def write_email(request):
     """

@@ -94,28 +94,24 @@ class CustomPasswordChangeForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Customize old password field
         self.fields['old_password'].widget = forms.PasswordInput(attrs={
             'class': 'form-control',
             'placeholder': 'Type your old password here',
         })
         self.fields['old_password'].label = 'Current Password'
         
-        # Customize new password field
         self.fields['new_password1'].widget = forms.PasswordInput(attrs={
             'class': 'form-control',
             'placeholder': 'Type your new password here',
         })
         self.fields['new_password1'].label = 'New Password'
         
-        # Customize password confirmation field
         self.fields['new_password2'].widget = forms.PasswordInput(attrs={
             'class': 'form-control',
             'placeholder': 'Confirm your new password here',
         })
         self.fields['new_password2'].label = 'Confirm New Password'
-        
-        # Add help text in German
+
         self.fields['new_password1'].help_text = '''
         <ul class="small text-muted mt-1">
             <li>A minimum of 8 characters.</li>

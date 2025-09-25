@@ -41,7 +41,8 @@ def add_new_user(first_name, last_name, email, password):
 
 def fetch_credit_offers_per_user(user_id):
     deactivate_old_credit_offers()
-    credit_offers = CreditOffer.objects.filter(client_id=user_id)
+    client_id = Client.objects.filter(user_id=user_id).first().id
+    credit_offers = CreditOffer.objects.filter(client_id=client_id)
     return credit_offers
 
 
@@ -93,12 +94,12 @@ def create_chat(credit_offer, user):
 
 def rephraze_offer(offer):
     """
-       Given a CreditOffer, returns all relevant relational data
+       Given a CreditOffer, returns all relevant data
        from CreditOffer, Loan, and Client for context building in an LLM chatbot.
     """
     RISK_THRESHOLD = getattr(settings, "RISK_THRESHOLD")
     context_lines = []
-    # Add more context if needed
+   
     if offer.loan_type:
         context_lines.append("\nLoan Details:")
         context_lines.append(f"- Interest Rate: {offer.loan_type.interest  * 100}")
@@ -106,7 +107,6 @@ def rephraze_offer(offer):
         context_lines.append(f"- Duration: {offer.loan_type.duration} months")
         context_lines.append(f"- Description: {offer.loan_type.description or 'N/A'}")
 
-    # Client details
     if offer.client:
         context_lines.append("\nClient Details:")
         context_lines.append(f"- Name: {offer.client.user.first_name} {offer.client.user.last_name}")
