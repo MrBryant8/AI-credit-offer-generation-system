@@ -91,12 +91,17 @@ class SignUpPageView(FormView):
             last_name = form.cleaned_data['last_name']
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            try:
-                user = add_new_user(first_name=first_name, last_name=last_name, email=email, password=password)
-                login(request, user)
-                return redirect('/home', )
-            except Exception as e:
-                error_message = str(e)
+            
+            if not email.endswith("smartcredit.com"):
+                error_message = "Only Smart Credit Employees are allowed to register."
+    
+            else: 
+                try:
+                    user = add_new_user(first_name=first_name, last_name=last_name, email=email, password=password)
+                    login(request, user)
+                    return redirect('/home', )
+                except Exception as e:
+                    error_message = str(e)
 
         return render(request, 'sign-up.html', {'error_message': error_message})
 
